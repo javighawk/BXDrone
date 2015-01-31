@@ -7,8 +7,7 @@
 /*****************************************/
 
 #include "BXD.h"
-#include "Accel.h"
-#include "Gyro.h"
+#include "IMUManager.h"
 #include "BXMoveMode.h"
 
 

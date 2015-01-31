@@ -1,7 +1,7 @@
 #include "Telemetry.h"
 
 /* Auxiliar variable to measure Telemetry period */
-unsigned long time;
+unsigned long timer;
 
 /* Turn for TM */
 int turn = 0;
@@ -64,7 +64,7 @@ void motorsTelemetry(){
         m4s = getMotorSpeed(4);
 
     // Send Motors speed
-    Serial.write( TEL_SPEED );
+    Serial.write( byte(TEL_SPEED) );
     Serial.write( m1s >> 8 );
     Serial.write( m1s );
     Serial.write( ENDOFPCK );
@@ -97,7 +97,7 @@ void motorsTelemetry(){
   
 void accelGyroTelemetry(){
   
-    // Send G components (readings from accelerometer)  
+/*    // Send G components (readings from accelerometer)  
     Serial.write( TEL_X );
     writeDouble( getXG() );
     Serial.write( ENDOFPCK );
@@ -116,26 +116,27 @@ void accelGyroTelemetry(){
     Serial.write( ENDOFPCK );
     Serial.write( TEL_DELTAROLL );
     writeDouble( dRoll );
-    Serial.write( ENDOFPCK );    
-    
+    Serial.write( ENDOFPCK );
+*/    
     
 }
 
 void degreesTelemetry(){    
-  
+
+/*  
     Serial.write( TEL_PITCH );
     writeDouble( getPitch() );
     Serial.write( ENDOFPCK );
     Serial.write( TEL_ROLL );
     writeDouble( getRoll() );
     Serial.write( ENDOFPCK );
-    
-    
+*/    
     
 }
 
 void alphaTelemetry(){
-    
+
+/*  
     // Send LPF Alpha parameter
     double alphaAccel = getAccelLPFAlpha();
     Serial.write( TEL_ALPHA_ACCEL );
@@ -145,6 +146,7 @@ void alphaTelemetry(){
     Serial.write( TEL_ALPHA_GYRO );
     writeDouble( alphaGyro );
     Serial.write( ENDOFPCK );
+*/
     double alphaDeg = getDegreesLPFAlpha();
     Serial.write( TEL_ALPHA_DEG );
     writeDouble( alphaDeg );
@@ -159,7 +161,7 @@ void PIDTelemetry(){
     
     // Send Enabled info
     if( PIDEnabled ) Serial.write( 1 );
-    else Serial.write( 0 );
+    else Serial.write( byte(0) );
     Serial.write( ENDOFPCK );
 
     // Send PID Values    
@@ -184,7 +186,8 @@ void PIDTelemetry(){
 }
 
 void accelOffsetsTelemetry(){
-  
+
+/*  
     Serial.write( TEL_OFFSETS );
     
     Serial.write( getAccelOffset(0) );
@@ -193,19 +196,21 @@ void accelOffsetsTelemetry(){
     Serial.write( ENDOFPCK );
     Serial.write( getAccelOffset(2) );
     Serial.write( ENDOFPCK );
+*/
     
     
 }
 
 void gyroStillValueTelemetry(){
 
+/*
     Serial.write( TEL_STILLLEVELS );
     
     writeDouble( getGyroXStillLevel() );
     Serial.write( ENDOFPCK );
     writeDouble( getGyroZStillLevel() );
     Serial.write( ENDOFPCK );
-    
+*/    
     
 }
 
@@ -219,7 +224,7 @@ void motorsPowerTelemetry(){
     for( i=1 ; i<=4 ; i++ ){
         if( getMotorPower(i) )
             Serial.write(1);
-        else Serial.write(0);
+        else Serial.write( byte(0) );
         Serial.write( ENDOFPCK );
     }    
 }
@@ -237,18 +242,7 @@ void motorOffsetsTelemetry(){
     }    
 }
 
-void startTM(){
-//    byte IDv = getIDvisitor();
-//    Serial.write( TELEMETRY + ( IDv << 4 ) );
-//    
-//    digitalWrite(SERIALPIN, HIGH);    
-//    while( !Serial.available() ){
-//        if( checkTimeOut() ) return false;
-//    }
-//    digitalWrite(SERIALPIN, LOW);
-//   
-//    return true;
-//    
+void startTM(){  
 
     digitalWrite(SERIALPIN, HIGH);
     
@@ -297,8 +291,8 @@ void startTM(){
   
 void checkTelemetry(){
   
-    if( (!pendingTM) && ((millis() - time) >= TELEMETRYTIME) ){
-        time = millis();
+    if( (!pendingTM) && ((millis() - timer) >= TELEMETRYTIME) ){
+        timer = millis();
         byte IDv = getIDvisitor();
         Serial.write( TM_PETITION + ( IDv << 4 ) );
         pendingTM = true;

@@ -15,7 +15,6 @@ void shortCutCommands(){
             byte pid, roll, value;
         
             while(!Serial.available()){
-                //checkTelemetry();
                 if( checkTimeOut() ) return;
             }
             
@@ -24,7 +23,6 @@ void shortCutCommands(){
             digitalWrite(SERIALPIN, HIGH);
             
             while(!Serial.available()){
-                //checkTelemetry();
                 if( checkTimeOut() ) return;
             }
             
@@ -33,7 +31,6 @@ void shortCutCommands(){
             digitalWrite(SERIALPIN, HIGH);
             
             while(!Serial.available()){
-                //checkTelemetry();
                 if( checkTimeOut() ) return;
             }
             
@@ -60,7 +57,6 @@ void shortCutCommands(){
            setTotalSpeed(0);
            
            while(!Serial.available()){
-                //checkTelemetry();
                 if( checkTimeOut() ) return;
            }   
            
@@ -72,7 +68,6 @@ void shortCutCommands(){
            time = millis();
            
            while( millis() - time < 1000 );
-               //checkTelemetry();
            
            setTotalSpeed(0);
            break;    
@@ -89,11 +84,10 @@ void shortCutCommands(){
            break;
            
            
-       case SHRTCMD_SETALPHA:
+       case SHRTCMD_SETALPHA:                  /* STILL TO DEFINE */
            byte alpha, device;
              
            while(!Serial.available()){
-                //checkTelemetry();
                 if( checkTimeOut() ) return;
            }    
            
@@ -102,7 +96,6 @@ void shortCutCommands(){
            digitalWrite(SERIALPIN, HIGH);
            
            while(!Serial.available()){
-                //checkTelemetry();
                 if( checkTimeOut() ) return;
            }    
            
@@ -115,8 +108,8 @@ void shortCutCommands(){
            switch( device ){
                
                case 0: setDegreesLPFAlpha( (double) alpha/100 ); break;
-               case 1: setAccelLPFAlpha( (double) alpha/100 ); break;
-               case 2: setGyroLPFAlpha( (double) alpha/100 ); break;
+               case 1: /* Reserved for accelerometer */ break;
+               case 2: /* Reserved for gyroscope */ break;
            }
            
            pendAlphaTM();
@@ -124,12 +117,11 @@ void shortCutCommands(){
            break;
     
            
-       case SHRTCMD_SETOFFSETS:
+       case SHRTCMD_SETOFFSETS:                  /* STILL TO DEFINE */
            byte axis;
            char val;
            
            while(!Serial.available()){
-                //checkTelemetry();
                 if( checkTimeOut() ) return;
            }
            
@@ -138,7 +130,6 @@ void shortCutCommands(){
            digitalWrite(SERIALPIN, HIGH);
            
            while(!Serial.available()){
-                //checkTelemetry();
                 if( checkTimeOut() ) return;
             }
             
@@ -147,10 +138,10 @@ void shortCutCommands(){
            digitalWrite(SERIALPIN, HIGH);
            
            if( (byte)val == 0xFF && axis == 0xFF ){
-               setAccelOffsets(0, DEFAULTXOFFSET);
-               setAccelOffsets(1, DEFAULTYOFFSET);
-               setAccelOffsets(2, DEFAULTZOFFSET);
-           } else setAccelOffsets(axis, val);
+               /* setAccelOffsets(0, DEFAULTXOFFSET); */
+               /* setAccelOffsets(1, DEFAULTYOFFSET); */
+              /* setAccelOffsets(2, DEFAULTZOFFSET); */
+           } /* else setAccelOffsets(axis, val); */
            
            pendAccelOffTM();
            break;
@@ -160,12 +151,12 @@ void shortCutCommands(){
            pendPIDTM();
            break;
             
-        case SHRTCMD_SETGND:
-           startGNDLevel();
+        case SHRTCMD_SETGND:                /* STILL TO DEFINE */
+           /* startGNDLevel(); */
            break;      
       
-        case SHRTCMD_SETSTILLLEVEL:
-           startStillLevel();
+        case SHRTCMD_SETSTILLLEVEL:          /* STILL TO DEFINE */
+           /* startStillLevel(); */
            break;    
           
         case SHRTCMD_SETMOTORPOWER:
@@ -173,7 +164,6 @@ void shortCutCommands(){
            boolean pow;
            int m;
            while(!Serial.available()){
-                //checkTelemetry();
                 if( checkTimeOut() ) return;
             }
           
@@ -192,7 +182,6 @@ void shortCutCommands(){
            byte mot, sp;
            
            while(!Serial.available()){
-                //checkTelemetry();
                 if( checkTimeOut() ) return;
            }
            digitalWrite(SERIALPIN, LOW);
@@ -201,7 +190,6 @@ void shortCutCommands(){
           
 
            while(!Serial.available()){
-                //checkTelemetry();
                 if( checkTimeOut() ) return;
            }
            digitalWrite(SERIALPIN, LOW);

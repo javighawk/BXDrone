@@ -1,13 +1,10 @@
 #include "PIDManager.h"
 #include <PID_v1.h>
 
-/* Auxiliar variable to measure Pitch & Roll computing period */
-unsigned long timePR;
+/* Pitch and roll values to be used by the PID controllers */
+double pitchAnglePID, rollAnglePID;
 
-/* Pitch and roll values */
-double pitchDeg, rollDeg;
-
-/* Enabled PID */
+/* Enabled PID variable */
 boolean enabl;
 
 /* TEMPORARY */
@@ -15,15 +12,13 @@ double diffM1=0, diffM2=0, diffM3=0, diffM4=0;
 double setPointRoll = 0;
 double setPointPitch = 0;
 
-double pitchF, pitchB, rollL, rollR;
-
 int PIDKv[2][3] = { {DEFAULT_PVALUE, DEFAULT_IVALUE, DEFAULT_DVALUE},
                     {DEFAULT_PVALUE, DEFAULT_IVALUE, DEFAULT_DVALUE}};
 
-PID pidPitch1(&pitchDeg, &pitchF, &setPointPitch, PIDKv[0][0], PIDKv[0][1], PIDKv[0][2], DIRECT);
-PID pidPitch3(&pitchDeg, &pitchB, &setPointPitch, PIDKv[0][0], PIDKv[0][1], PIDKv[0][2], REVERSE);
-PID pidRoll2(&rollDeg, &rollR, &setPointRoll, PIDKv[1][0], PIDKv[1][1], PIDKv[1][2], DIRECT);
-PID pidRoll4(&rollDeg, &rollL, &setPointRoll, PIDKv[1][0], PIDKv[1][1], PIDKv[1][2], REVERSE);
+PID pidPitch1(&pitchAnglePID, &diffM1, &setPointPitch, PIDKv[0][0], PIDKv[0][1], PIDKv[0][2], DIRECT);
+PID pidPitch3(&pitchAnglePID, &diffM3, &setPointPitch, PIDKv[0][0], PIDKv[0][1], PIDKv[0][2], REVERSE);
+PID pidRoll2(&rollAnglePID, &diffM2, &setPointRoll, PIDKv[1][0], PIDKv[1][1], PIDKv[1][2], DIRECT);
+PID pidRoll4(&rollAnglePID, &diffM4, &setPointRoll, PIDKv[1][0], PIDKv[1][1], PIDKv[1][2], REVERSE);
 
 /* Degrees LPF parameter */
 double ALPHADEG = 1;
@@ -32,24 +27,19 @@ void PIDInit(){
     
     pidPitch1.SetMode(AUTOMATIC);
     pidPitch1.SetOutputLimits(-200, +200);
-    pidPitch1.SetSampleTime(10);
+    pidPitch1.SetSampleTime(1);
     pidPitch3.SetMode(AUTOMATIC);
     pidPitch3.SetOutputLimits(-200, +200);
-    pidPitch3.SetSampleTime(10);
+    pidPitch3.SetSampleTime(1);
     
     pidRoll2.SetMode(AUTOMATIC);
     pidRoll2.SetOutputLimits(-200, +200);
-    pidRoll2.SetSampleTime(10);
+    pidRoll2.SetSampleTime(1);
     pidRoll4.SetMode(AUTOMATIC);
     pidRoll4.SetOutputLimits(-200, +200);
-    pidRoll4.SetSampleTime(10);
+    pidRoll4.SetSampleTime(1);
     
     enabl = true;
-    
-    accelInit();
-    gyroInit();
-    
-    timePR = millis();
 }
 
 void PIDCompute(){
@@ -60,11 +50,6 @@ void PIDCompute(){
     pidRoll2.Compute();
     pidRoll4.Compute();
     
-    diffM1 = pitchF;
-    diffM2 = rollR;
-    diffM3 = pitchB;
-    diffM4 = rollL;
-    
     setAddingMotorSpeed(1);
     setAddingMotorSpeed(2);
     setAddingMotorSpeed(3);
@@ -73,25 +58,9 @@ void PIDCompute(){
 }
 
 void runPitchRoll(){
-    if( millis()-timePR >= PR_PERIOD_MS ){
-        double oldPitch = pitchDeg;
-        double oldRoll = rollDeg;
-        computeAccelerometer();
-        computeGyro();
-        pitchDeg = 0.95*(pitchDeg+getGyroDeltaPitch()) + 0.05*getAccelPitch();
-        rollDeg = 0.95*(rollDeg+getGyroDeltaRoll()) + 0.05*getAccelRoll();
-        pitchDeg = ALPHADEG*pitchDeg + (1-ALPHADEG)*oldPitch;
-        rollDeg = ALPHADEG*rollDeg + (1-ALPHADEG)*oldRoll;
-        timePR = millis();
-    }
-}
-
-double getPitch(){
-    return pitchDeg;
-}
-
-double getRoll(){
-    return rollDeg;
+    computeIMU();
+    pitchAnglePID = getPitch();
+    rollAnglePID = getRoll();
 }
 
 double getDiffMotor(int motor){
@@ -133,10 +102,6 @@ void setPIDEnabled( boolean enabled ){
         diffM2 = 0;
         diffM3 = 0;
         diffM4 = 0;
-        pitchF = 0;
-        pitchB = 0;
-        rollR = 0;
-        rollL = 0;
     }
     
     enabl = enabled;
@@ -147,8 +112,8 @@ boolean isPIDEnabled(){
 }
 
 void PIDSetCurrentOLevels(){
-    setPointPitch = pitchDeg;
-    setPointRoll = rollDeg;
+    setPointPitch = pitchAnglePID;
+    setPointRoll = rollAnglePID;
 }
 
 double PIDGetPitchOLevel(){

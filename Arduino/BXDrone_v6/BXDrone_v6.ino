@@ -4,6 +4,8 @@
 #include "Telemetry.h"
 #include "PIDManager.h"
 #include "BXCommandMode.h"
+#include "I2Cdev.h"
+#include "MPU6050.h"
 #include <PID_v1.h>
 #include <Servo.h>
 
@@ -48,6 +50,7 @@ void setup(){
     listen();
     BX_initMoveMode();
     PIDInit();
+    IMUInit();
     feedTimeOut();
     digitalWrite(GREENLEDPIN, HIGH);
 }
