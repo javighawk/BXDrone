@@ -15,8 +15,6 @@
 /**************** DEFINES ****************/
 /*****************************************/
 
-#define PR_PERIOD_MS        10
-
 #define DEFAULT_PVALUE     50
 #define DEFAULT_IVALUE      2
 #define DEFAULT_DVALUE      3
@@ -39,7 +37,5 @@ boolean isPIDEnabled();
 void PIDSetCurrentOLevels();
 double PIDGetPitchOLevel();
 double PIDGetRollOLevel();
-double getDegreesLPFAlpha();
-void setDegreesLPFAlpha( double k );
 
 #endif

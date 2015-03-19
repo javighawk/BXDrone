@@ -20,9 +20,6 @@ PID pidPitch3(&pitchAnglePID, &diffM3, &setPointPitch, PIDKv[0][0], PIDKv[0][1],
 PID pidRoll2(&rollAnglePID, &diffM2, &setPointRoll, PIDKv[1][0], PIDKv[1][1], PIDKv[1][2], DIRECT);
 PID pidRoll4(&rollAnglePID, &diffM4, &setPointRoll, PIDKv[1][0], PIDKv[1][1], PIDKv[1][2], REVERSE);
 
-/* Degrees LPF parameter */
-double ALPHADEG = 1;
-
 void PIDInit(){
     
     pidPitch1.SetMode(AUTOMATIC);
@@ -122,12 +119,4 @@ double PIDGetPitchOLevel(){
 
 double PIDGetRollOLevel(){
     return setPointRoll;
-}
-
-double getDegreesLPFAlpha(){
-    return ALPHADEG;
-}
-
-void setDegreesLPFAlpha( double k ){
-    ALPHADEG = k;
 }

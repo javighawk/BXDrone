@@ -107,9 +107,9 @@ void shortCutCommands(){
            
            switch( device ){
                
-               case 0: setDegreesLPFAlpha( (double) alpha/100 ); break;
-               case 1: /* Reserved for accelerometer */ break;
-               case 2: /* Reserved for gyroscope */ break;
+               case 0: setDegLPFAlpha( (double) alpha/100 ); break;
+               case 1: setAccelLPFAlpha( (double) alpha/100 ); break;
+               case 2: setGyroLPFAlpha( (double) alpha/100 ); break;
            }
            
            pendAlphaTM();
@@ -117,9 +117,17 @@ void shortCutCommands(){
            break;
     
            
-       case SHRTCMD_SETOFFSETS:                  /* STILL TO DEFINE */
-           byte axis;
-           char val;
+       case SHRTCMD_SETOFFSETS:
+           byte dev, axis;
+           int val;
+           
+           while(!Serial.available()){
+                if( checkTimeOut() ) return;
+           }
+           
+           digitalWrite(SERIALPIN, LOW);
+           dev = Serial.read();
+           digitalWrite(SERIALPIN, HIGH);
            
            while(!Serial.available()){
                 if( checkTimeOut() ) return;
@@ -129,21 +137,29 @@ void shortCutCommands(){
            axis = Serial.read();
            digitalWrite(SERIALPIN, HIGH);
            
-           while(!Serial.available()){
-                if( checkTimeOut() ) return;
-            }
-            
-           digitalWrite(SERIALPIN, LOW);
-           val = Serial.read();
-           digitalWrite(SERIALPIN, HIGH);
+           if( axis != 0xFF ){
            
-           if( (byte)val == 0xFF && axis == 0xFF ){
-               /* setAccelOffsets(0, DEFAULTXOFFSET); */
-               /* setAccelOffsets(1, DEFAULTYOFFSET); */
-              /* setAccelOffsets(2, DEFAULTZOFFSET); */
-           } /* else setAccelOffsets(axis, val); */
+               while(!Serial.available()){
+                    if( checkTimeOut() ) return;
+                }
+                
+               digitalWrite(SERIALPIN, LOW);
+               val = Serial.read();
+               digitalWrite(SERIALPIN, HIGH);
+               
+               while(!Serial.available()){
+                    if( checkTimeOut() ) return;
+                }
+                
+               digitalWrite(SERIALPIN, LOW);
+               val = (val << 8) + Serial.read();
+               digitalWrite(SERIALPIN, HIGH);
+           }
+           
+           setOffsets(dev, axis, val);
            
            pendAccelOffTM();
+           pendGyroOffTM();
            break;
             
         case SHRTCMD_SETOLEVELS:
@@ -151,12 +167,12 @@ void shortCutCommands(){
            pendPIDTM();
            break;
             
-        case SHRTCMD_SETGND:                /* STILL TO DEFINE */
-           /* startGNDLevel(); */
+        case SHRTCMD_STARTACCELOFFSETS:
+           startAccelOffsets();
            break;      
       
-        case SHRTCMD_SETSTILLLEVEL:          /* STILL TO DEFINE */
-           /* startStillLevel(); */
+        case SHRTCMD_STARTGYROOFFSETS:
+           startGyroOffsets();
            break;    
           
         case SHRTCMD_SETMOTORPOWER:

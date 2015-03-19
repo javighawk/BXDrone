@@ -6,6 +6,7 @@
 #include "BXCommandMode.h"
 #include "I2Cdev.h"
 #include "MPU6050.h"
+#include "Wire.h"
 #include <PID_v1.h>
 #include <Servo.h>
 
@@ -40,7 +41,7 @@
 byte infoByte, modeInfo;
 
 void setup(){
-    Serial.begin(19200);
+    Serial.begin(SERIAL_BPS);
     pinMode(GREENLEDPIN,OUTPUT);
     pinMode(REDLEDPIN,OUTPUT);
     pinMode(SERIALPIN,OUTPUT);
@@ -88,8 +89,6 @@ void identifyByte(){
             shortCutCommands();
             return; 
         }
-//        movemode = command.run(movemode);
-//        Serial.write( EOT + (iComm.getIDvisitor() << 4) );
         return;
     }
     

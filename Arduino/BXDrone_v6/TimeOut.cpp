@@ -25,7 +25,7 @@ int checkTimeOut(){
     pendPIDTM();
     pendAlphaTM();
     pendAccelOffTM();
-    pendGyroStillTM();
+    pendGyroOffTM();
     pendMotorsPowerTM();
     pendMotorOffsetsTM();
     return 1;    

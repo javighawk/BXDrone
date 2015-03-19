@@ -9,9 +9,9 @@ public class TimeOutThread extends Thread {
 		while(true){
 			if(progress){
 				if(System.currentTimeMillis() - time > timeOut){
-					MainAction.pauseSystem();
-					MainAction.window1.println("Conexion perdida");
+					MainAction.window1.println("[NOC]: Connection lost");
 					pause();
+					MainAction.pauseSystem();
 				}
 			}
 			

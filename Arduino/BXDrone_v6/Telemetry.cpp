@@ -13,10 +13,29 @@ boolean pendingTM = false;
 boolean pendingPIDTM = true;
 boolean pendingAlphaTM = true;
 boolean pendingAccelOffTM = true;
-boolean pendingGyroStillTM = true;
+boolean pendingGyroOffTM = true;
 boolean pendingMotorsPowerTM = true;
 boolean pendingMotorOffsetsTM = true;
 
+/* 
+ * Function used to send Telemetry. It performs byte stuffing
+ * so the data sent is not in conflict with ENDOFCPK byte 
+ */
+void SerialSendData(uint32_t data, int len){
+    
+    for( int i=len-1 ; i>=0 ; i-- ){
+        byte sending = (data >> 8*i) & 0xFF;
+        if( sending == ESC || sending == ENDOFPCK )
+            Serial.write( ESC );
+            
+        Serial.write( sending );
+    }
+}
+
+
+/* 
+ * Function created to send a double as a String with 2 decimals
+ */
 void writeDouble(double param){
   
     int ent = (int)param;
@@ -44,13 +63,17 @@ void writeDouble(double param){
     
     int i;
     for( i=0 ; i<p.length() ; i++ ){
-      Serial.write(p.charAt(i));
+      SerialSendData(p.charAt(i), 1);
     }
 }
 
+
+/*
+ * Notifies the end of Telemetry transmission
+ */
 void endTM(){
     byte IDv = getIDvisitor();
-    Serial.write( ENDOFTM + ( IDv << 4 ) );
+    SerialSendData( ENDOFTM + ( IDv << 4 ), 1 );
     pendingTM = false;
 }
     
@@ -64,23 +87,19 @@ void motorsTelemetry(){
         m4s = getMotorSpeed(4);
 
     // Send Motors speed
-    Serial.write( byte(TEL_SPEED) );
-    Serial.write( m1s >> 8 );
-    Serial.write( m1s );
+    SerialSendData( byte(TEL_SPEED), 1 );
+    SerialSendData( m1s, 2 );
     Serial.write( ENDOFPCK );
-    Serial.write( m2s >> 8 );
-    Serial.write( m2s );
+    SerialSendData( m2s, 2 );
     Serial.write( ENDOFPCK );
-    Serial.write( m3s >> 8 );
-    Serial.write( m3s );
+    SerialSendData( m3s, 2 );
     Serial.write( ENDOFPCK );
-    Serial.write( m4s >> 8 );
-    Serial.write( m4s );
+    SerialSendData( m4s, 2 );
     Serial.write( ENDOFPCK );
 
     
     // Send differential Motors speed
-    Serial.write( TEL_DIFFMOTOR );
+    SerialSendData( TEL_DIFFMOTOR, 1 );
     writeDouble( getDiffMotor(1) );
     Serial.write( ENDOFPCK );
     writeDouble( getDiffMotor(2) );
@@ -97,120 +116,139 @@ void motorsTelemetry(){
   
 void accelGyroTelemetry(){
   
-/*    // Send G components (readings from accelerometer)  
-    Serial.write( TEL_X );
-    writeDouble( getXG() );
-    Serial.write( ENDOFPCK );
-    Serial.write( TEL_Y );
-    writeDouble( getYG() );
-    Serial.write( ENDOFPCK );
-    Serial.write( TEL_Z );        
-    writeDouble( getZG() );
-    Serial.write( ENDOFPCK );
+    /* Get raw accelerometer readings */
+    int16_t accelX = getRawAccelX();
+    int16_t accelY = getRawAccelY();
+    int16_t accelZ = getRawAccelZ();
     
-    double dPitch = getGyroDeltaPitch();
-    double dRoll = getGyroDeltaRoll();
-        
-    Serial.write( TEL_DELTAPITCH );
-    writeDouble( dPitch );
-    Serial.write( ENDOFPCK );
-    Serial.write( TEL_DELTAROLL );
-    writeDouble( dRoll );
-    Serial.write( ENDOFPCK );
-*/    
+    /* Get raw gyro readings */
+    int16_t gyroX = getRawGyroX();
+    int16_t gyroY = getRawGyroY();
+    int16_t gyroZ = getRawGyroZ();
     
+  
+    /* Send Accel readings */  
+    SerialSendData( TEL_ACCELX, 1 );
+    SerialSendData( accelX, 2 );
+    Serial.write( ENDOFPCK );
+    SerialSendData( TEL_ACCELY, 1 );
+    SerialSendData( accelY, 2 );
+    Serial.write( ENDOFPCK );
+    SerialSendData( TEL_ACCELZ, 1 );
+    SerialSendData( accelZ, 2 );
+    Serial.write( ENDOFPCK );
+
+    /* Send Gyro readings */
+    SerialSendData( TEL_GYROX, 1 );
+    SerialSendData( gyroX, 2 );
+    Serial.write( ENDOFPCK );
+    SerialSendData( TEL_GYROY, 1 );
+    SerialSendData( gyroY, 2 );
+    Serial.write( ENDOFPCK );
+    SerialSendData( TEL_GYROZ, 1 );
+    SerialSendData( gyroZ, 2 );
+    Serial.write( ENDOFPCK );    
 }
 
-void degreesTelemetry(){    
-
-/*  
-    Serial.write( TEL_PITCH );
-    writeDouble( getPitch() );
+void anglesTelemetry(){    
+  
+    double p = getPitch()*1000;
+    double r = getRoll()*1000;
+    
+    long pint = long(p);
+    long rint = long(r);
+  
+    SerialSendData( TEL_PITCH, 1 );
+    SerialSendData( pint, 4 );
     Serial.write( ENDOFPCK );
-    Serial.write( TEL_ROLL );
-    writeDouble( getRoll() );
-    Serial.write( ENDOFPCK );
-*/    
+    SerialSendData( TEL_ROLL, 1 );
+    SerialSendData( rint, 4 );
+    Serial.write( ENDOFPCK );   
     
 }
 
 void alphaTelemetry(){
 
-/*  
-    // Send LPF Alpha parameter
     double alphaAccel = getAccelLPFAlpha();
-    Serial.write( TEL_ALPHA_ACCEL );
-    writeDouble( alphaAccel );
-    Serial.write( ENDOFPCK );
     double alphaGyro = getGyroLPFAlpha();
-    Serial.write( TEL_ALPHA_GYRO );
-    writeDouble( alphaGyro );
-    Serial.write( ENDOFPCK );
-*/
-    double alphaDeg = getDegreesLPFAlpha();
-    Serial.write( TEL_ALPHA_DEG );
-    writeDouble( alphaDeg );
-    Serial.write( ENDOFPCK );    
+    double alphaDeg = getDegLPFAlpha();
+    
+    int alphaD = int(alphaDeg*100);
+    int alphaA = int(alphaAccel*100);
+    int alphaG = int(alphaGyro*100);
+    
+    SerialSendData( TEL_ALPHA_DEG, 1 );
+    SerialSendData( alphaD, 1 );
+    Serial.write( ENDOFPCK );  
+    
+    SerialSendData( TEL_ALPHA_ACCEL, 1 );
+    SerialSendData( alphaA, 1 );
+    Serial.write( ENDOFPCK );   
+    
+    SerialSendData( TEL_ALPHA_GYRO, 1 );
+    SerialSendData( alphaG, 1 );
+    Serial.write( ENDOFPCK );     
 }
 
 void PIDTelemetry(){
     int i,j;
     boolean PIDEnabled = isPIDEnabled();
     
-    Serial.write( TEL_PIDVALUES );
+    SerialSendData( TEL_PIDVALUES, 1 );
     
     // Send Enabled info
-    if( PIDEnabled ) Serial.write( 1 );
-    else Serial.write( byte(0) );
+    if( PIDEnabled ) SerialSendData( 1, 1);
+    else SerialSendData( 0, 1 );
     Serial.write( ENDOFPCK );
 
     // Send PID Values    
     for( i=0; i<2 ; i++ ){
         for( j=0 ; j<3 ; j++ ){
             int val = getPIDValues( i,j );
-            Serial.write(val >> 24);
-            Serial.write(val >> 16);
-            Serial.write(val >> 8);
-            Serial.write(val);
+            SerialSendData(val, 4);
             Serial.write( ENDOFPCK );
         }
     }
     
-    Serial.write( TEL_OLEVELS );
-    
-    writeDouble( PIDGetPitchOLevel() );
-    Serial.write( ENDOFPCK );
-    writeDouble( PIDGetRollOLevel() );
-    Serial.write( ENDOFPCK );
+//    Serial.write( TEL_OLEVELS );
+//    
+//    writeDouble( PIDGetPitchOLevel() );
+//    Serial.write( ENDOFPCK );
+//    writeDouble( PIDGetRollOLevel() );
+//    Serial.write( ENDOFPCK );
     
 }
 
 void accelOffsetsTelemetry(){
 
-/*  
-    Serial.write( TEL_OFFSETS );
-    
-    Serial.write( getAccelOffset(0) );
+    int aOffX = getAccelOffsetX();
+    int aOffY = getAccelOffsetY();
+    int aOffZ = getAccelOffsetZ();
+  
+    SerialSendData( TEL_ACCELOFFSETS, 1 );
+    SerialSendData( aOffX, 2 );
     Serial.write( ENDOFPCK );
-    Serial.write( getAccelOffset(1) );
+    SerialSendData( aOffY, 2 );
     Serial.write( ENDOFPCK );
-    Serial.write( getAccelOffset(2) );
+    SerialSendData( aOffZ, 2 );
     Serial.write( ENDOFPCK );
-*/
-    
     
 }
 
-void gyroStillValueTelemetry(){
+void gyroOffsetsTelemetry(){
 
-/*
-    Serial.write( TEL_STILLLEVELS );
+    int gOffX = getGyroOffsetX();
+    int gOffY = getGyroOffsetY();
+    int gOffZ = getGyroOffsetZ();
+  
+    SerialSendData( TEL_GYROOFFSETS, 1 );
+    SerialSendData( gOffX, 2 );
+    Serial.write( ENDOFPCK );
+    SerialSendData( gOffY, 2 );
+    Serial.write( ENDOFPCK );
+    SerialSendData( gOffZ, 2 );
+    Serial.write( ENDOFPCK );
     
-    writeDouble( getGyroXStillLevel() );
-    Serial.write( ENDOFPCK );
-    writeDouble( getGyroZStillLevel() );
-    Serial.write( ENDOFPCK );
-*/    
     
 }
 
@@ -219,12 +257,12 @@ void motorsPowerTelemetry(){
     
     int i;
   
-    Serial.write( TEL_MOTORSPOWER );
+    SerialSendData( TEL_MOTORSPOWER, 1 );
     
     for( i=1 ; i<=4 ; i++ ){
         if( getMotorPower(i) )
-            Serial.write(1);
-        else Serial.write( byte(0) );
+            SerialSendData(1, 1);
+        else SerialSendData( 0, 1);
         Serial.write( ENDOFPCK );
     }    
 }
@@ -234,10 +272,10 @@ void motorOffsetsTelemetry(){
     
     int i;
   
-    Serial.write( TEL_MOTOROFFSETS );
+    SerialSendData( TEL_MOTOROFFSETS, 1 );
     
     for( i=1 ; i<=4 ; i++ ){
-        Serial.write(getMotorOffset(i));
+        SerialSendData(getMotorOffset(i), 1);
         Serial.write( ENDOFPCK );
     }    
 }
@@ -248,7 +286,7 @@ void startTM(){
     
     if( pendingTM ){
         byte IDv = getIDvisitor();
-        Serial.write( TELEMETRY + ( IDv << 4 ) );
+        SerialSendData( TELEMETRY + ( IDv << 4 ), 1 );
         
         switch( turn ){
             case 0:
@@ -257,7 +295,7 @@ void startTM(){
                 break;
             case 1:
                 accelGyroTelemetry();
-                degreesTelemetry();
+                anglesTelemetry();
                 turn = 0;
                 break;
         }
@@ -271,9 +309,9 @@ void startTM(){
         }else if( pendingAccelOffTM ){
             accelOffsetsTelemetry();
             pendingAccelOffTM = false;
-        }else if( pendingGyroStillTM ){
-            gyroStillValueTelemetry();
-            pendingGyroStillTM = false;
+        }else if( pendingGyroOffTM ){
+            gyroOffsetsTelemetry();
+            pendingGyroOffTM = false;
         }else if( pendingMotorsPowerTM ){
             motorsPowerTelemetry();
             pendingMotorsPowerTM = false;
@@ -294,7 +332,7 @@ void checkTelemetry(){
     if( (!pendingTM) && ((millis() - timer) >= TELEMETRYTIME) ){
         timer = millis();
         byte IDv = getIDvisitor();
-        Serial.write( TM_PETITION + ( IDv << 4 ) );
+        SerialSendData( TM_PETITION + ( IDv << 4 ), 1 );
         pendingTM = true;
     }    
 }
@@ -302,7 +340,7 @@ void checkTelemetry(){
 void pendPIDTM(){ pendingPIDTM = true; }
 void pendAlphaTM(){ pendingAlphaTM = true; }
 void pendAccelOffTM(){ pendingAccelOffTM = true; }
-void pendGyroStillTM(){ pendingGyroStillTM = true; }
+void pendGyroOffTM(){ pendingGyroOffTM = true; }
 void pendMotorsPowerTM(){ pendingMotorsPowerTM = true; }
 void pendMotorOffsetsTM(){ pendingMotorOffsetsTM = true; }
 void cancelTM(){ pendingTM = false; }

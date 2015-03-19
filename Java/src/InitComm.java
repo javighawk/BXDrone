@@ -1,14 +1,10 @@
 public class InitComm{
-	
-	private final int ACK = 6;
-	private final int BEACON = 7;
-	private final int I_AM = 1;
 
 	private final int MAX_ID = 15;
 	private final int MIN_ID = 10;
 	
-	private final int ID_FLAG = 240;
-	private final int MSG_FLAG = 15;
+	private final int ID_MASK = 0xF0;
+	private final int MSG_MASK = 0x0F;
 	
 	private int IDvisitor, inputData, NOC_ID;
 	
@@ -30,11 +26,11 @@ public class InitComm{
 			
 	private boolean identify(){
 		
-		if((inputData & MSG_FLAG) != BEACON){
+		if((inputData & MSG_MASK) != Comm.BEACON){
 			return false;
 		}
 		
-		int ID = ((inputData & ID_FLAG) >> 4);
+		int ID = ((inputData & ID_MASK) >> 4);
 		MainAction.window1.println("[NOC]: IDvisitor = " + ID);
 		
 		if(isIDValid(ID)){
@@ -61,15 +57,15 @@ public class InitComm{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		MainAction.arduino.sendData((short) (I_AM + (IDvisitor << 4)));
+		MainAction.arduino.sendData((short) (Comm.I_AM + (IDvisitor << 4)));
 		MainAction.arduino.sendData((short) NOC_ID);
 
 		MainAction.window1.println("[NOC]: Sent I_AM message to " + IDvisitor);
 		
-		if(!waitFor(ACK + (NOC_ID << 4))) return false;
+		if(!waitFor(Comm.ACK + (NOC_ID << 4))) return false;
 		MainAction.window1.println("[NOC]: Received ACK of I_AM message");
 
-		MainAction.arduino.sendData((short) (ACK + (IDvisitor << 4)));
+		MainAction.arduino.sendData((short) (Comm.ACK + (IDvisitor << 4)));
 		MainAction.OCOMMSemaphore.release();
 		MainAction.window1.println("[NOC]: Sent ACK to " + IDvisitor);
 		

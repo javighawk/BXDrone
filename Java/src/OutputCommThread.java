@@ -32,12 +32,4 @@ public class OutputCommThread extends Thread {
 	public void threadContinue(){
 		progress = true;
 	}
-	
-	public void setProgress(boolean prog){
-		progress = prog;
-	}
-	
-	public boolean getProgress(){
-		return progress;
-	}
 }

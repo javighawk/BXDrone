@@ -35,7 +35,6 @@ public class MainAction{
 		startComm.run();
 		window1.setConnected();
 		arduino.setSpeed((short) window1.slider.getValue());
-		arduino.setLightPower(window1.sliderLight.getValue());
 		outputS = new OutputCommThread();
 		inputS = new InputCommThread();
 		window1.addKeyListener(new ArduinoKeyListener());
@@ -51,12 +50,10 @@ public class MainAction{
 	}
 
 	public static void reconnect(){
-		System.out.println("Reconnect");
 		arduino.initialize();
 		startComm.run();
 		window1.setConnected();
 		arduino.setSpeed((short) window1.slider.getValue());
-		arduino.setLightPower(window1.sliderLight.getValue());
 		inputS.threadContinue();
 		inputS.setStandBy(true);
 	}
