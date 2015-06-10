@@ -68,5 +68,8 @@ double getGyroLPFAlpha();
 double getAccelLPFAlpha();
 void startGyroOffsets();
 void startAccelOffsets();
+unsigned long getDelta();
+unsigned long getMaxDelta();
+unsigned long getAvgDelta();
 
 #endif

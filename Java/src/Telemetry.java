@@ -24,6 +24,7 @@ public class Telemetry{
 	public final static byte TEL_MOTOROFFSETS = 0x14;
 	public final static byte TEL_ACCELRES	  = 0x15;
 	public final static byte TEL_GYRORES      = 0x16;
+	public final static int TEL_DELTA		  = 0x99;		/* TEMPORARY */
 	public final static byte ENDOFTM		  = 0x05;
 	
 	private final static int[] accelRes = {2, 4, 8, 16},
@@ -151,7 +152,9 @@ public class Telemetry{
 					while((inputTelemetry = MainAction.arduino.readData()) != Comm.ENDOFPCK)
 						if(inputTelemetry != -1)
 							pitch = (pitch << 8) + inputTelemetry;
-					MainAction.window1.labelPitch.setText(Double.toString(((double)pitch)/1000) + " º");					
+					String p = Double.toString(((double)pitch)/1000) + " º";
+					if (pitch >= 0) p = " " + p;
+					MainAction.window1.labelPitch.setText(p);					
 					break;
 					
 				case Telemetry.TEL_ROLL:
@@ -159,7 +162,9 @@ public class Telemetry{
 					while((inputTelemetry = MainAction.arduino.readData()) != Comm.ENDOFPCK)
 						if(inputTelemetry != -1)
 							roll = (roll << 8) + inputTelemetry;
-					MainAction.window1.labelRoll.setText(Double.toString(((double)roll)/1000) + " º");
+					String r = Double.toString(((double)roll)/1000) + " º";
+					if (roll >= 0) r = " " + r;
+					MainAction.window1.labelRoll.setText(r);
 					break;
 					
 				case Telemetry.TEL_ACCELX:
@@ -442,6 +447,21 @@ public class Telemetry{
 					while((inputTelemetry = MainAction.arduino.readData()) != Comm.ENDOFPCK)
 						if(inputTelemetry != -1)
 							currentGyroRes = inputTelemetry;
+					break;
+					
+				case Telemetry.TEL_DELTA:
+					int delta = 0, maxdelta = 0, avgdelta = 0;
+					while((inputTelemetry = MainAction.arduino.readData()) != Comm.ENDOFPCK)
+						if(inputTelemetry != -1)
+							delta = (delta << 8) + inputTelemetry;
+					while((inputTelemetry = MainAction.arduino.readData()) != Comm.ENDOFPCK)
+						if(inputTelemetry != -1)
+							maxdelta = (maxdelta << 8) + inputTelemetry;
+					while((inputTelemetry = MainAction.arduino.readData()) != Comm.ENDOFPCK)
+						if(inputTelemetry != -1)
+							avgdelta = (avgdelta << 8) + inputTelemetry;
+					System.out.println("DELTA = " + delta + "us, MAXDELTA = " + maxdelta + "us, AVGDELTA = " + avgdelta + "us");
+					break;					
 			}	
 		}
 	}

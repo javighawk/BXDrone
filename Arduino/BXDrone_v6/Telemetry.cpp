@@ -16,6 +16,7 @@ boolean pendingAccelOffTM = true;
 boolean pendingGyroOffTM = true;
 boolean pendingMotorsPowerTM = true;
 boolean pendingMotorOffsetsTM = true;
+boolean pendingMotorSpeedTM = true;
 
 /* 
  * Function used to send Telemetry. It performs byte stuffing
@@ -147,7 +148,20 @@ void accelGyroTelemetry(){
     Serial.write( ENDOFPCK );
     SerialSendData( TEL_GYROZ, 1 );
     SerialSendData( gyroZ, 2 );
-    Serial.write( ENDOFPCK );    
+    Serial.write( ENDOFPCK );   
+   
+   /* TEMPORARY */
+   unsigned long delta = getDelta();
+   unsigned long maxdelta = getMaxDelta();
+   unsigned long avgdelta = getAvgDelta();
+   SerialSendData( TEL_DELTA, 1 );
+   SerialSendData( delta, 4 );
+   Serial.write( ENDOFPCK );
+   SerialSendData( maxdelta, 4 );
+   Serial.write( ENDOFPCK );
+   SerialSendData( avgdelta, 4 );
+   Serial.write( ENDOFPCK );
+   
 }
 
 void anglesTelemetry(){    
@@ -288,19 +302,22 @@ void startTM(){
         byte IDv = getIDvisitor();
         SerialSendData( TELEMETRY + ( IDv << 4 ), 1 );
         
-        switch( turn ){
-            case 0:
-                motorsTelemetry();
-                turn++;
-                break;
-            case 1:
+//        switch( turn ){
+//            case 0:
+//                motorsTelemetry();
+//                turn++;
+//                break;
+//            case 1:
                 accelGyroTelemetry();
-                anglesTelemetry();
-                turn = 0;
-                break;
-        }
+//                anglesTelemetry();
+//                turn = 0;
+//                break;
+//        }
         
-        if( pendingPIDTM ){
+        if( pendingMotorSpeedTM ){
+            motorsTelemetry();
+            pendingMotorSpeedTM = false;
+        }else if( pendingPIDTM ){
             PIDTelemetry();
             pendingPIDTM = false;
         }else if( pendingAlphaTM ){
@@ -343,4 +360,5 @@ void pendAccelOffTM(){ pendingAccelOffTM = true; }
 void pendGyroOffTM(){ pendingGyroOffTM = true; }
 void pendMotorsPowerTM(){ pendingMotorsPowerTM = true; }
 void pendMotorOffsetsTM(){ pendingMotorOffsetsTM = true; }
+void pendMotorSpeedTM(){ pendingMotorSpeedTM = true; }
 void cancelTM(){ pendingTM = false; }

@@ -39,6 +39,7 @@
 #define TEL_GYROOFFSETS   0x12
 #define TEL_MOTORSPOWER   0x13
 #define TEL_MOTOROFFSETS  0x14
+#define TEL_DELTA         0x99
 #define ENDOFPCK          0x1B
 #define ENDOFTM           0x05
 #define ESC               0x7E
@@ -57,6 +58,7 @@ void pendAccelOffTM();
 void pendGyroOffTM();
 void pendMotorsPowerTM();
 void pendMotorOffsetsTM();
+void pendMotorSpeedTM();
 void cancelTM();
 
 #endif

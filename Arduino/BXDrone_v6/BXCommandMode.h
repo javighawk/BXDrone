@@ -28,6 +28,7 @@
 #define SHRTCMD_STARTGYROOFFSETS  0x43
 #define SHRTCMD_SETMOTORPOWER     0x50 
 #define SHRTCMD_SETMOTOROFFSET    0x51
+#define SHRTCMD_STOPMOTORS        0x52
 
 
 /*******************************************/

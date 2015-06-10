@@ -58,38 +58,15 @@ void BX_initMoveMode(){
 }
 
 void runMoveMode(){
+  
   _byte = infoByte;
-  while(1){
+  speedInfo = _byte & SPEED_MASK;
+  directionInfo = _byte & DIRECTION_MASK;
+  modeInfo = _byte & MODE_MASK;
     
-    feedTimeOut();
-    PIDCompute();
-    
-    if( _byte == TM_CONFIRMATION ){ startTM(); }
-    
-    else{
-        digitalWrite(SERIALPIN, HIGH);
-        speedInfo = _byte & SPEED_MASK;
-        directionInfo = _byte & DIRECTION_MASK;
-        modeInfo = _byte & MODE_MASK;
-    
-        if(modeInfo == 0) ZMoveBot(speedInfo, directionInfo);
-        else if(modeInfo == 12) XYMoveBot(speedInfo, directionInfo);
-        
-        if( speedInfo==0 ) Serial.write(EOT + (getIDvisitor() << 4) );
-        
-        if(M1Speed == 0 && M2Speed == 0 && M3Speed == 0 && M4Speed == 0) return;
-        digitalWrite(SERIALPIN, LOW);
-    }
-    
-    while(1){
-        checkTelemetry();
-        if( checkTimeOut() ) return;
-        PIDCompute();
-        if( Serial.available() > 0 ) break;
-    }
-    
-    _byte = Serial.read();
-  }
+  if( speedInfo==0 ){ Serial.write(EOT + (getIDvisitor() << 4) ); return; }
+  if(modeInfo == 0) ZMoveBot(speedInfo, directionInfo);
+  else if(modeInfo == 12) XYMoveBot(speedInfo, directionInfo);
 }
 
 void ZMoveBot(byte speedT, byte direction){
@@ -133,6 +110,7 @@ void ZMoveBot(byte speedT, byte direction){
 //    setMotorSpeed( 4, totalSpeed - speedT * SPEED_DEVIATION );
     break;
   }
+  pendMotorSpeedTM();
 }
 
 void XYMoveBot(byte speedT, byte direction){
@@ -153,6 +131,7 @@ void XYMoveBot(byte speedT, byte direction){
   case 0x30:
     break;
   }
+  pendMotorSpeedTM();
 }
 
 //void deviateMotorSpeed( int motor, int speed ){

@@ -37,7 +37,8 @@ bool gyroOffReady[3] = {true,true,true};
 double accelPitchAngle, accelRollAngle;
 
 /* Time variables to compute angles difference with gyro info */
-unsigned long auxtime, delta;
+unsigned long auxtime, delta, maxdelta, auxavgdelta, avgdelta;
+uint8_t counter = 0;
 
 /* Angle values in degrees */
 double pitchAngle, rollAngle;
@@ -104,33 +105,37 @@ void computeIMU(){
     /* Get Accel and Gyro readings */
     IMU.getMotion6(&accel[0], &accel[1], &accel[2], &gyro[0], &gyro[1], &gyro[2]);    
     
-    /* Apply offsets */
-    for( int i=0 ; i<3 ; i++ ){
-        accel[i] += accelOffsets[i];
-        gyro[i] += gyroOffsets[i];
-    }
+//    /* Apply offsets */
+//    for( int i=0 ; i<3 ; i++ ){
+//        accel[i] += accelOffsets[i];
+//        gyro[i] += gyroOffsets[i];
+//    }
     
-    /* Apply LPF to gyro and accelerometer */
-    for( int i=0 ; i<3 ; i++ ){
-        accel[i] = accel[i]*ALPHA_ACCEL + (1-ALPHA_ACCEL)*auxAccel[i];
-        gyro[i] = gyro[i]*ALPHA_GYRO + (1-ALPHA_GYRO)*auxGyro[i];
-    }
+//    /* Apply LPF to gyro and accelerometer */
+//    for( int i=0 ; i<3 ; i++ ){
+//        accel[i] = accel[i]*ALPHA_ACCEL + (1-ALPHA_ACCEL)*auxAccel[i];
+//        gyro[i] = gyro[i]*ALPHA_GYRO + (1-ALPHA_GYRO)*auxGyro[i];
+//    }
     
     /* Refresh time variables to compute pitch and roll */
     delta = micros() - auxtime;
     auxtime = micros();
+    if( delta > maxdelta ) maxdelta = delta;
+    if( counter < 100 ){ auxavgdelta += delta; counter++; }
+    else{ avgdelta = auxavgdelta/100; auxavgdelta = 0; counter = 0; }
+    
     
     /* Compute pitch and roll */
-    computeAccel();
-    computeGyro();
+//    computeAccel();
+//    computeGyro();
     
     /* Calculate angles from gyro and acceleroeter readings */
     pitchAngle = 0.9*(pitchAngle + gyroDPS[1]) + 0.1*accelPitchAngle;
     rollAngle = 0.9*(rollAngle + gyroDPS[0]) + 0.1*accelRollAngle;
     
-    /* Apply LPF to the final angles */
-    pitchAngle = pitchAngle*ALPHA_DEG + (1-ALPHA_DEG)*auxPitch;
-    rollAngle = rollAngle*ALPHA_DEG + (1-ALPHA_DEG)*auxRoll;
+//    /* Apply LPF to the final angles */
+//    pitchAngle = pitchAngle*ALPHA_DEG + (1-ALPHA_DEG)*auxPitch;
+//    rollAngle = rollAngle*ALPHA_DEG + (1-ALPHA_DEG)*auxRoll;
     
     /* Compute offsets if needed */
     if( !gyroOffReady[0] || !gyroOffReady[1] || !gyroOffReady[2] )
@@ -232,6 +237,10 @@ int getGyroOffsetZ(){ return gyroOffsets[2]; }
 double getDegLPFAlpha(){ return ALPHA_DEG; }
 double getGyroLPFAlpha(){ return ALPHA_GYRO; }
 double getAccelLPFAlpha(){ return ALPHA_ACCEL; }
+
+unsigned long getDelta(){ return delta; }
+unsigned long getMaxDelta(){ return maxdelta; }
+unsigned long getAvgDelta(){ return avgdelta; }
 
 void startAccelOffsets(){
     accelOffReady[0] = false;

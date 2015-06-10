@@ -10,17 +10,17 @@ public class OutputCommThread extends Thread {
 	
 	public void run(){
 		while(true){
-			if(progress){
-				try{
+			try{
+				if(progress){
 					MainAction.OCOMMSemaphore.acquire();
 					MainAction.arduino.sendData();
 					MainAction.OCOMMSemaphore.release();
-					sleep(100);
-				}
-				catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				}				
+				sleep(100);
+			}
+			catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 		}
 	}

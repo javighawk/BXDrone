@@ -28,6 +28,7 @@ public class Comm{
 	public final static short STARTGYROOFFSETS = 0x43;
 	public final static short SWITCHMOTOR = 0x50;
 	public final static short MOTOROFFSETS = 0x51;
+	public final static short STOPMOTORS = 0x52;
 	
 	public final static short MOVEMODE = 0;
 	public final static short COMMANDMODE = 8;
@@ -60,7 +61,7 @@ public class Comm{
     /** Milliseconds to block while waiting for port open */
     private static final int TIME_OUT = 2000;
     /** Default bits per second for COM port. */
-    private static final int DATA_RATE = 19200;
+    private static final int DATA_RATE = 38400;
     
     public void initialize(){
     	 
@@ -103,6 +104,16 @@ public class Comm{
         outputData = 0;
     }
     
+    //**************************************************************//
+    //********************* General functions **********************//
+    //**************************************************************//
+    
+    /**
+     * Set outputData parameter to 0
+     */
+    public void clearOutputData(){
+    	outputData = 0;
+    }
 
     //**************************************************************//
     //********************* Movement functions *********************//
@@ -146,18 +157,29 @@ public class Comm{
 		outputData = (short) (outputData | speed);
     }
     
-    /**
-     * Sends speed 0 to Arduino and tells the
-     * inputStream to wait for ACK
-     */
-    public void standBy(){
-	    outputData = (short) (outputData & SPEEDMASK);
-    }
+//    /**
+//     * Sends speed 0 to Arduino and tells the
+//     * inputStream to wait for ACK
+//     */
+//    public void standBy(){
+//	    outputData = (short) (outputData & SPEEDMASK);
+//    }
  
     
     //**************************************************************//
     //********************* Command functions **********************//
     //**************************************************************//
+    
+    public void setSHRTCMDMode(){
+    	outputData = (short) (outputData & MODEMASK);
+    	outputData = (short) (outputData | COMMANDMODE | SHORTCUTCOMMAND );    	
+    }
+    
+    public void setStopAllMotors(){
+    	outputData = 0;
+    	setSHRTCMDMode();
+    	outputData = (short) (outputData | STOPMOTORS );
+    }
  
     public void sendPID(int roll, int pid){
 
