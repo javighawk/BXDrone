@@ -83,7 +83,7 @@ public class InterfazGrafica extends JFrame{
     public JSlider sliderGOffX, sliderGOffY, sliderGOffZ;
     public JLabel lblOffX, lblOffY, lblOffZ, lbl0Pitch, lbl0Roll;
     public JLabel lblGOffX, lblGOffY, lblGOffZ;
-    public  JButton btnDefaultOffsets, btnSetLevel, btnSetStillLevel;
+    public  JButton btnDefaultOffsets, btnSetLevel, btnSetStillLevel, defaultGOffsets;
     public JButton btnSwitchM1, btnSwitchM2, btnSwitchM3, btnSwitchM4;
     private JPanel panel_4;
     private JPanel panel_5;
@@ -1351,7 +1351,7 @@ public class InterfazGrafica extends JFrame{
         label_16.setBounds(8, 67, 158, 14);
         panel_7.add(label_16);
         
-        JButton defaultGOffsets = new JButton("Default Offsets");
+        defaultGOffsets = new JButton("Default Offsets");
         defaultGOffsets.setBounds(10, 157, 129, 23);
         defaultGOffsets.addMouseListener(new MouseListener(){
 
@@ -1735,6 +1735,7 @@ public class InterfazGrafica extends JFrame{
     	btnSetLevel.setEnabled(false);
     	btnSetGround.setEnabled(false);
     	btnSetStillLevel.setEnabled(false);
+    	defaultGOffsets.setEnabled(false);
     	sliderAlphaDeg.setEnabled(false);
 		sldOffM1.setEnabled(false);
 		sldOffM2.setEnabled(false);
@@ -1808,6 +1809,21 @@ public class InterfazGrafica extends JFrame{
     	button.setEnabled(false); 
     	slider.requestFocus();    
     	clearTelemetry();
+    	
+    	sliderAlphaGyro.setEnabled(true);
+    	sliderAlphaAccel.setEnabled(true);
+    	sliderOffX.setEnabled(true);
+    	sliderOffY.setEnabled(true);
+    	sliderOffZ.setEnabled(true);
+    	sliderGOffX.setEnabled(true);
+    	sliderGOffY.setEnabled(true);
+    	sliderGOffZ.setEnabled(true);
+    	
+    	btnDefaultOffsets.setEnabled(true);
+    	btnSetStillLevel.setEnabled(true);
+    	btnSetLevel.setEnabled(true);
+    	defaultGOffsets.setEnabled(true);
+    	
     }
     
     public void print(String s){

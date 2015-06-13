@@ -77,6 +77,7 @@ public class Telemetry{
 						MainAction.window1.sliderGOffY.setEnabled(true);
 						MainAction.window1.sliderGOffZ.setEnabled(true);
 						MainAction.window1.btnDefaultOffsets.setEnabled(true);
+						MainAction.window1.defaultGOffsets.setEnabled(true);
 						MainAction.window1.btnSetLevel.setEnabled(true);
 						MainAction.window1.btnSetGround.setEnabled(true);
 						MainAction.window1.btnSetStillLevel.setEnabled(true);
@@ -104,6 +105,7 @@ public class Telemetry{
 						MainAction.window1.sliderGOffY.setEnabled(false);
 						MainAction.window1.sliderGOffZ.setEnabled(false);
 						MainAction.window1.btnDefaultOffsets.setEnabled(false);
+						MainAction.window1.defaultGOffsets.setEnabled(false);
 						MainAction.window1.btnSetLevel.setEnabled(false);
 						MainAction.window1.btnSetGround.setEnabled(false);
 						MainAction.window1.btnSetStillLevel.setEnabled(false);
