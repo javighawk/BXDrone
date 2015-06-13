@@ -37,8 +37,12 @@ bool gyroOffReady[3] = {true,true,true};
 double accelPitchAngle, accelRollAngle;
 
 /* Time variables to compute angles difference with gyro info */
-unsigned long auxtime, delta, maxdelta, auxavgdelta, avgdelta;
-uint8_t counter = 0;
+unsigned long auxtime, delta, maxdelta = 0;
+
+/* Auxilair variable to calculate the average of delta ERASE LATER */
+int times = 0;
+unsigned long compute = 0, avgDelta = 0;
+bool activateMaxDelta = false;
 
 /* Angle values in degrees */
 double pitchAngle, rollAngle;
@@ -119,10 +123,18 @@ void computeIMU(){
     
     /* Refresh time variables to compute pitch and roll */
     delta = micros() - auxtime;
-    auxtime = micros();
-    if( delta > maxdelta ) maxdelta = delta;
-    if( counter < 100 ){ auxavgdelta += delta; counter++; }
-    else{ avgdelta = auxavgdelta/100; auxavgdelta = 0; counter = 0; }
+    auxtime = delta + auxtime;
+    
+    if( activateMaxDelta ){
+        if( delta > maxdelta && auxtime != 0 ) maxdelta = delta;
+        compute += delta;
+        times++;
+        if( times == 100 ){
+            avgDelta = compute/100;
+            times = 0;
+            compute = 0;
+        }
+    }
     
     
     /* Compute pitch and roll */
@@ -238,9 +250,10 @@ double getDegLPFAlpha(){ return ALPHA_DEG; }
 double getGyroLPFAlpha(){ return ALPHA_GYRO; }
 double getAccelLPFAlpha(){ return ALPHA_ACCEL; }
 
+/* TEMPORARY FUNCTIONS */
 unsigned long getDelta(){ return delta; }
-unsigned long getMaxDelta(){ return maxdelta; }
-unsigned long getAvgDelta(){ return avgdelta; }
+unsigned long getMaxDelta(){ activateMaxDelta = true; return maxdelta; }
+unsigned long getAvgDelta(){ return avgDelta; }
 
 void startAccelOffsets(){
     accelOffReady[0] = false;

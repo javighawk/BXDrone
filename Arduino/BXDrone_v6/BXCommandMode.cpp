@@ -1,45 +1,47 @@
 #include "BXCommandMode.h"
 
+/* infoByte declaration which carries the command info */
 extern byte infoByte;
+
+/* Functions declarations */
+void CMD_PIDValues(); 
+void CMD_TestMotors();
+void CMD_SwitchPID(); 
+void CMD_SetLPFAlpha(); 
+void CMD_SetOffsets(); 
+void CMD_Set0Levels(); 
+void CMD_StartAccelOffsets(); 
+void CMD_StartGyroOffsets(); 
+void CMD_MotorsSwitch(); 
+void CMD_SetMotorOffset(); 
+void CMD_StopMotors();
 
 void BX_initCommandMode(){    
 }
-
-void CMD_SHRT_PID();
-void CMD_SHRT_TestMotors();
-void CMD_SHRT_SwitchPID();
-void CMD_SHRT_SetLPFAlpha();
-void CMD_SHRT_SetOffsets();
-void CMD_SHRT_Set0Levels();
-void CMD_SHRT_StartAccelOffsets();
-void CMD_SHRT_StartGyroOffsets();
-void CMD_SHRT_SetMotorPower();
-void CMD_SHRT_SetMotorOffset();
-void CMD_SHRT_StopMotors();
                           
 void shortCutCommands(){
   
     digitalWrite(SERIALPIN, HIGH);
   
     switch(infoByte & COMMAND_SHORTCUT_MASK){
-       case SHRTCMD_PID: CMD_SHRT_PID(); break;
-       case SHRTCMD_TESTMOTORS: CMD_SHRT_TestMotors(); break;
-       case SHRTCMD_SWITCHPID: CMD_SHRT_SwitchPID(); break;
-       case SHRTCMD_SETALPHA: CMD_SHRT_SetLPFAlpha(); break;
-       case SHRTCMD_SETOFFSETS: CMD_SHRT_SetOffsets(); break;
-       case SHRTCMD_SETOLEVELS: CMD_SHRT_Set0Levels(); break;
-       case SHRTCMD_STARTACCELOFFSETS: CMD_SHRT_StartAccelOffsets(); break;
-       case SHRTCMD_STARTGYROOFFSETS: CMD_SHRT_StartGyroOffsets(); break;
-       case SHRTCMD_SETMOTORPOWER: CMD_SHRT_SetMotorPower(); break;
-       case SHRTCMD_SETMOTOROFFSET: CMD_SHRT_SetMotorOffset(); break;
-       case SHRTCMD_STOPMOTORS: CMD_SHRT_StopMotors(); break;
+       case SHRTCMD_PID: CMD_PIDValues(); break;
+       case SHRTCMD_TESTMOTORS: CMD_TestMotors(); break;
+       case SHRTCMD_SWITCHPID: CMD_SwitchPID(); break;
+       case SHRTCMD_SETALPHA: CMD_SetLPFAlpha(); break;
+       case SHRTCMD_SETOFFSETS: CMD_SetOffsets(); break;
+       case SHRTCMD_SETOLEVELS: CMD_Set0Levels(); break;
+       case SHRTCMD_STARTACCELOFFSETS: CMD_StartAccelOffsets(); break;
+       case SHRTCMD_STARTGYROOFFSETS: CMD_StartGyroOffsets(); break;
+       case SHRTCMD_SETMOTORPOWER: CMD_MotorsSwitch(); break;
+       case SHRTCMD_SETMOTOROFFSET: CMD_SetMotorOffset(); break;
+       case SHRTCMD_STOPMOTORS: CMD_StopMotors(); break;
     }
    
     digitalWrite(SERIALPIN, LOW);
 }
 
 
-void CMD_SHRT_PID(){
+void CMD_PIDValues(){
             byte pid, roll, value;
         
             while(!Serial.available()){
@@ -77,7 +79,7 @@ void CMD_SHRT_PID(){
             pendPIDTM();
 }
 
-void CMD_SHRT_TestMotors(){
+void CMD_TestMotors(){
            byte motor;
            unsigned long time;
          
@@ -99,7 +101,7 @@ void CMD_SHRT_TestMotors(){
            setTotalSpeed(0);
 }
 
-void CMD_SHRT_SwitchPID(){
+void CMD_SwitchPID(){
            if( isPIDEnabled() )
                setPIDEnabled(false);
            else setPIDEnabled(true);
@@ -108,7 +110,7 @@ void CMD_SHRT_SwitchPID(){
 }
 
 
-void CMD_SHRT_SetLPFAlpha(){
+void CMD_SetLPFAlpha(){
            byte alpha, device;
              
            while(!Serial.available()){
@@ -139,7 +141,7 @@ void CMD_SHRT_SetLPFAlpha(){
            pendAlphaTM();
 }
 
-void CMD_SHRT_SetOffsets(){
+void CMD_SetOffsets(){
            byte dev, axis;
            int val;
            
@@ -184,15 +186,15 @@ void CMD_SHRT_SetOffsets(){
            pendGyroOffTM();
 }
 
-void CMD_SHRT_Set0Levels(){
+void CMD_Set0Levels(){
            PIDSetCurrentOLevels();
            pendPIDTM();
 }
 
-void CMD_SHRT_StartAccelOffsets(){ startAccelOffsets(); }
-void CMD_SHRT_StartGyroOffsets(){ startGyroOffsets(); }
+void CMD_StartAccelOffsets(){ startAccelOffsets(); }
+void CMD_StartGyroOffsets(){ startGyroOffsets(); }
 
-void CMD_SHRT_SetMotorPower(){
+void CMD_MotorsSwitch(){
            boolean pow;
            int m;
            while(!Serial.available()){
@@ -208,7 +210,7 @@ void CMD_SHRT_SetMotorPower(){
            pendMotorsPowerTM();  
 }
 
-void CMD_SHRT_SetMotorOffset(){
+void CMD_SetMotorOffset(){
            byte mot, sp;
            
            while(!Serial.available()){
@@ -230,7 +232,7 @@ void CMD_SHRT_SetMotorOffset(){
            pendMotorOffsetsTM();  
 }
 
-void CMD_SHRT_StopMotors(){
+void CMD_StopMotors(){
            setTotalSpeed(0);
            Serial.write(EOT + (getIDvisitor() << 4) );
            pendMotorSpeedTM();
