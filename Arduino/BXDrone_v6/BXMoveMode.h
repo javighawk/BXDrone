@@ -44,5 +44,6 @@ boolean getMotorPower(int motor);
 void setMotorPower(int motor, boolean power);
 void setMotorOffset( byte mot, byte sp );
 byte getMotorOffset( int mot );
+bool isBXDMoving();
 
 #endif

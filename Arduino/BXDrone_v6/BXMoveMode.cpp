@@ -27,6 +27,9 @@ Servo motor1, motor2, motor3, motor4;
 /* Incoming byte info */
 byte _byte, speedInfo, directionInfo;
 
+/* Variable indicating whether the motors are moving or not */
+bool BXDMoving = false;
+
 extern byte infoByte, modeInfo;
 
 /* Current motors speed */
@@ -63,8 +66,12 @@ void runMoveMode(){
   speedInfo = _byte & SPEED_MASK;
   directionInfo = _byte & DIRECTION_MASK;
   modeInfo = _byte & MODE_MASK;
-    
-  if( speedInfo==0 ){ Serial.write(EOT + (getIDvisitor() << 4) ); return; }
+  
+  if( M1Speed == 0 && M2Speed == 0 && M3Speed == 0 && M4Speed == 0 )
+      BXDMoving = false;
+  else BXDMoving = true;
+  
+  if( speedInfo == 0 ){ Serial.write(EOT + (getIDvisitor() << 4) ); return; }
   if(modeInfo == 0) ZMoveBot(speedInfo, directionInfo);
   else if(modeInfo == 12) XYMoveBot(speedInfo, directionInfo);
 }
@@ -78,10 +85,10 @@ void ZMoveBot(byte speedT, byte direction){
     M4Speed += speedT * 5;
     M3Speed += speedT * 5;
     
-    setAddingMotorSpeed(1);
-    setAddingMotorSpeed(2);
-    setAddingMotorSpeed(3);
-    setAddingMotorSpeed(4);
+//    setAddingMotorSpeed(1);
+//    setAddingMotorSpeed(2);
+//    setAddingMotorSpeed(3);
+//    setAddingMotorSpeed(4);
     break;
 
   case 0x10:
@@ -90,10 +97,10 @@ void ZMoveBot(byte speedT, byte direction){
     M4Speed -= speedT * 5;
     M3Speed -= speedT * 5;
     
-    setAddingMotorSpeed(1);
-    setAddingMotorSpeed(2);
-    setAddingMotorSpeed(3);
-    setAddingMotorSpeed(4);
+//    setAddingMotorSpeed(1);
+//    setAddingMotorSpeed(2);
+//    setAddingMotorSpeed(3);
+//    setAddingMotorSpeed(4);
     break;
 
   case 0x20:
@@ -133,32 +140,6 @@ void XYMoveBot(byte speedT, byte direction){
   }
   pendMotorSpeedTM();
 }
-
-//void deviateMotorSpeed( int motor, int speed ){
-//  if( motor < 1 || motor > 4 ) return;
-//  
-//  if( speed < 0 ) speed = 0;
-//  if( speed > MAX_SPEED ) speed = MAX_SPEED;
-//
-//  switch(motor){
-//      case 1:
-//        motor1.writeMicroseconds( MIN_SIGNAL + speed );
-//        break;
-//    
-//      case 2:
-//        motor2.writeMicroseconds( MIN_SIGNAL + speed );
-//        break;
-//    
-//      case 3:
-//        motor3.writeMicroseconds( MIN_SIGNAL + speed );
-//        break;
-//    
-//      case 4:
-//        motor4.writeMicroseconds( MIN_SIGNAL + speed );
-//        break;
-//  }         
-//
-//}
 
 
 void setMotorSpeed( int motor, int speed ){
@@ -299,4 +280,6 @@ byte getMotorOffset( int mot ){
     return mOffset[mot-1];
 }
 
-
+bool isBXDMoving(){
+    return BXDMoving;
+}

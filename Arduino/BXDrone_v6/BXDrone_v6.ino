@@ -58,6 +58,8 @@ void setup(){
 
 void loop(){
     runPitchRoll();
+    if( isBXDMoving() ) 
+        PIDCompute();
     checkTelemetry();
     if( checkTimeOut() );
     if(Serial.available() > 0)

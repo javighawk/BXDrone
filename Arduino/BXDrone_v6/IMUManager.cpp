@@ -4,7 +4,7 @@
 MPU6050 IMU;
 
 /* Accelerometer readings */
-int16_t accel[3];
+int accel[3];
 
 /* Accelerometer readings in [G] units */
 double accelG[3];
@@ -13,7 +13,7 @@ double accelG[3];
 int accelRes[4] = {2, 4, 8, 16};
 
 /* Gyroscope readings */
-int16_t gyro[3];
+int gyro[3];
 
 /* Gyroscope readings in [deg/sec] units */
 double gyroDPS[3];
@@ -70,17 +70,17 @@ void IMUInit(){
 void computeAccel(){
     
     /* Convert readings to [G] units */
-    accelG[0] = double(accel[0])*accelRes[accelCurrentRes]/32767;
-    accelG[1] = double(accel[1])*accelRes[accelCurrentRes]/32767;
-    accelG[2] = double(accel[2])*accelRes[accelCurrentRes]/32767;
+//    accelG[0] = double(accel[0])*accelRes[accelCurrentRes]/32767;
+//    accelG[1] = double(accel[1])*accelRes[accelCurrentRes]/32767;
+//    accelG[2] = double(accel[2])*accelRes[accelCurrentRes]/32767;
     
     /* Calculate pitch and roll angles from accelerometer readings */
-    accelPitchAngle = atan2(accelG[1], accelG[2]);
-    accelRollAngle = atan2(accelG[0], sqrt(accelG[1]*accelG[1] + accelG[2]*accelG[2]));
+    accelPitchAngle = atan2(accel[1], accel[2]);
+    accelRollAngle = atan2(accel[0], sqrt(pow(accel[1],2) + pow(accel[2],2)));
     
     /* Convert it to degrees */
-    accelPitchAngle *= 180.0/pi;
-    accelRollAngle *= 180.0/pi;
+//    accelPitchAngle *= 180.0/pi;
+//    accelRollAngle *= 180.0/pi;
 }
 
 /* Compute the gyroscope readings */
@@ -99,55 +99,36 @@ void computeGyro(){
 
 /* Get readings from IMU and compute them to get the angles */
 void computeIMU(){
-       
-    /* Auxiliar variables */
-    int16_t auxAccel[3] = {accel[0], accel[1], accel[2]};
-    int16_t auxGyro[3] = {gyro[0], gyro[1], gyro[2]};
-    double auxPitch = pitchAngle;
-    double auxRoll = rollAngle;
     
     /* Get Accel and Gyro readings */
     IMU.getMotion6(&accel[0], &accel[1], &accel[2], &gyro[0], &gyro[1], &gyro[2]);    
     
-//    /* Apply offsets */
-//    for( int i=0 ; i<3 ; i++ ){
-//        accel[i] += accelOffsets[i];
-//        gyro[i] += gyroOffsets[i];
-//    }
-    
-//    /* Apply LPF to gyro and accelerometer */
-//    for( int i=0 ; i<3 ; i++ ){
-//        accel[i] = accel[i]*ALPHA_ACCEL + (1-ALPHA_ACCEL)*auxAccel[i];
-//        gyro[i] = gyro[i]*ALPHA_GYRO + (1-ALPHA_GYRO)*auxGyro[i];
-//    }
+    /* Apply offsets */
+    for( int i=0 ; i<3 ; i++ ){
+        accel[i] += accelOffsets[i];
+        gyro[i] += gyroOffsets[i];
+    }
     
     /* Refresh time variables to compute pitch and roll */
     delta = micros() - auxtime;
     auxtime = delta + auxtime;
     
-    if( activateMaxDelta ){
-        if( delta > maxdelta && auxtime != 0 ) maxdelta = delta;
-        compute += delta;
-        times++;
-        if( times == 100 ){
-            avgDelta = compute/100;
-            times = 0;
-            compute = 0;
-        }
-    }
-    
+    if( delta > maxdelta ) maxdelta = delta;
+    compute += delta;
+    times++;
+    if( times == 100 ){
+        avgDelta = compute/100;
+        times = 0;
+        compute = 0;
+    }    
     
     /* Compute pitch and roll */
-//    computeAccel();
+    computeAccel();
 //    computeGyro();
     
     /* Calculate angles from gyro and acceleroeter readings */
-    pitchAngle = 0.9*(pitchAngle + gyroDPS[1]) + 0.1*accelPitchAngle;
-    rollAngle = 0.9*(rollAngle + gyroDPS[0]) + 0.1*accelRollAngle;
-    
-//    /* Apply LPF to the final angles */
-//    pitchAngle = pitchAngle*ALPHA_DEG + (1-ALPHA_DEG)*auxPitch;
-//    rollAngle = rollAngle*ALPHA_DEG + (1-ALPHA_DEG)*auxRoll;
+    pitchAngle = accelPitchAngle; //0.9*(pitchAngle + gyroDPS[1]) + 0.1*accelPitchAngle;
+    rollAngle = accelRollAngle; //0.9*(rollAngle + gyroDPS[0]) + 0.1*accelRollAngle;
     
     /* Compute offsets if needed */
     if( !gyroOffReady[0] || !gyroOffReady[1] || !gyroOffReady[2] )
@@ -252,8 +233,12 @@ double getAccelLPFAlpha(){ return ALPHA_ACCEL; }
 
 /* TEMPORARY FUNCTIONS */
 unsigned long getDelta(){ return delta; }
-unsigned long getMaxDelta(){ activateMaxDelta = true; return maxdelta; }
 unsigned long getAvgDelta(){ return avgDelta; }
+unsigned long getMaxDelta(){
+    unsigned long auxTime = maxdelta;
+    maxdelta = 0;    
+    return auxTime;
+}
 
 void startAccelOffsets(){
     accelOffReady[0] = false;

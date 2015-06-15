@@ -303,7 +303,7 @@ void startTM(){
         
         switch( turn ){
             case 0:
-//                motorsDiffTelemetry();
+                motorsDiffTelemetry();
                 turn++;
                 break;
             case 1:
