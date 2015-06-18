@@ -9,7 +9,6 @@ void CMD_TestMotors();
 void CMD_SwitchPID(); 
 void CMD_SetLPFAlpha(); 
 void CMD_SetOffsets(); 
-void CMD_Set0Levels(); 
 void CMD_StartAccelOffsets(); 
 void CMD_StartGyroOffsets(); 
 void CMD_MotorsSwitch(); 
@@ -29,7 +28,6 @@ void shortCutCommands(){
        case SHRTCMD_SWITCHPID: CMD_SwitchPID(); break;
        case SHRTCMD_SETALPHA: CMD_SetLPFAlpha(); break;
        case SHRTCMD_SETOFFSETS: CMD_SetOffsets(); break;
-       case SHRTCMD_SETOLEVELS: CMD_Set0Levels(); break;
        case SHRTCMD_STARTACCELOFFSETS: CMD_StartAccelOffsets(); break;
        case SHRTCMD_STARTGYROOFFSETS: CMD_StartGyroOffsets(); break;
        case SHRTCMD_SETMOTORPOWER: CMD_MotorsSwitch(); break;
@@ -69,13 +67,13 @@ void CMD_PIDValues(){
             digitalWrite(SERIALPIN, HIGH);
             
             if( roll==0xFF && pid==0xFF && value==0xFF ){
-                setPIDValues(0, 0, DEFAULT_PVALUE);
-                setPIDValues(0, 1, DEFAULT_IVALUE);
-                setPIDValues(0, 2, DEFAULT_DVALUE);
-                setPIDValues(1, 0, DEFAULT_PVALUE);
-                setPIDValues(1, 1, DEFAULT_IVALUE);
-                setPIDValues(1, 2, DEFAULT_DVALUE);
-            } else setPIDValues( roll, pid, value );
+                setPIDValues(0, 0, double(DEFAULT_PVALUE_ANGLES)/100);
+                setPIDValues(0, 1, double(DEFAULT_IVALUE_ANGLES)/100);
+                setPIDValues(0, 2, double(DEFAULT_DVALUE_ANGLES)/100);
+                setPIDValues(1, 0, double(DEFAULT_PVALUE_GYRO)/100);
+                setPIDValues(1, 1, double(DEFAULT_IVALUE_GYRO)/100);
+                setPIDValues(1, 2, double(DEFAULT_DVALUE_GYRO)/100);
+            } else setPIDValues( roll, pid, double(value)/100 );
             pendPIDTM();
 }
 
@@ -184,11 +182,6 @@ void CMD_SetOffsets(){
            
            pendAccelOffTM();
            pendGyroOffTM();
-}
-
-void CMD_Set0Levels(){
-           PIDSetCurrentOLevels();
-           pendPIDTM();
 }
 
 void CMD_StartAccelOffsets(){ startAccelOffsets(); }

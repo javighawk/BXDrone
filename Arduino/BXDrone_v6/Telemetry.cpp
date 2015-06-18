@@ -33,6 +33,22 @@ void SerialSendData(uint32_t data, int len){
     }
 }
 
+/* 
+ * Function used to send Telemetry. It performs byte stuffing
+ * so the data sent is not in conflict with ENDOFCPK byte 
+ * Receives a pointer to the data.
+ */
+void SerialSendData2(byte *data, int len){
+    
+    for( int i=len-1 ; i>=0 ; i-- ){
+        byte sending = *(data + i);
+        if( sending == ESC || sending == ENDOFPCK )
+            Serial.write( ESC );
+            
+        Serial.write( sending );
+    }
+}
+
 
 /* 
  * Function created to send a double as a String with 2 decimals
@@ -102,65 +118,46 @@ void motorsSpeedTelemetry(){
 void motorsDiffTelemetry(){
   
     // Send differential Motors speed
+    int diffMotors[4];
+    
+    diffMotors[0] = int(getDiffMotor(1) * 100);
+    diffMotors[1] = int(getDiffMotor(2) * 100);
+    diffMotors[2] = int(getDiffMotor(3) * 100);
+    diffMotors[3] = int(getDiffMotor(4) * 100);
+    
     SerialSendData( TEL_DIFFMOTOR, 1 );
-    writeDouble( getDiffMotor(1) );
-    Serial.write( ENDOFPCK );
-    writeDouble( getDiffMotor(2) );
-    Serial.write( ENDOFPCK );
-    writeDouble( getDiffMotor(3) );
-    Serial.write( ENDOFPCK );
-    writeDouble( getDiffMotor(4) );
-    Serial.write( ENDOFPCK );
+    SerialSendData2( (byte *)diffMotors, 8 );
+    
+//    
+//    writeDouble( getDiffMotor(1) );
+//    Serial.write( ENDOFPCK );
+//    writeDouble( getDiffMotor(2) );
+//    Serial.write( ENDOFPCK );
+//    writeDouble( getDiffMotor(3) );
+//    Serial.write( ENDOFPCK );
+//    writeDouble( getDiffMotor(4) );
+//    Serial.write( ENDOFPCK );
 }
   
   
 void accelGyroTelemetry(){
   
-    /* Get raw accelerometer readings */
-    int16_t accelX = getRawAccelX();
-    int16_t accelY = getRawAccelY();
-    int16_t accelZ = getRawAccelZ();
-    
-    /* Get raw gyro readings */
-    int16_t gyroX = getRawGyroX();
-    int16_t gyroY = getRawGyroY();
-    int16_t gyroZ = getRawGyroZ();
-    
-  
     /* Send Accel readings */  
-    SerialSendData( TEL_ACCELX, 1 );
-    SerialSendData( accelX, 2 );
-    Serial.write( ENDOFPCK );
-    SerialSendData( TEL_ACCELY, 1 );
-    SerialSendData( accelY, 2 );
-    Serial.write( ENDOFPCK );
-    SerialSendData( TEL_ACCELZ, 1 );
-    SerialSendData( accelZ, 2 );
-    Serial.write( ENDOFPCK );
+    SerialSendData( TEL_ACCEL, 1 );
+    SerialSendData2( (byte *)getAccelValues(), 6 );
 
     /* Send Gyro readings */
-    SerialSendData( TEL_GYROX, 1 );
-    SerialSendData( gyroX, 2 );
-    Serial.write( ENDOFPCK );
-    SerialSendData( TEL_GYROY, 1 );
-    SerialSendData( gyroY, 2 );
-    Serial.write( ENDOFPCK );
-    SerialSendData( TEL_GYROZ, 1 );
-    SerialSendData( gyroZ, 2 );
-    Serial.write( ENDOFPCK );   
+    SerialSendData( TEL_GYRO, 1 );
+    SerialSendData2( (byte *)getGyroValues(), 6 );
    
    /* TEMPORARY */
-   unsigned long delta = getDelta();
-   unsigned long maxdelta = getMaxDelta();
-   unsigned long avgdelta = getAvgDelta();
    SerialSendData( TEL_DELTA, 1 );
-   SerialSendData( delta, 4 );
+   SerialSendData( getDelta(), 4 );
    Serial.write( ENDOFPCK );
-   SerialSendData( maxdelta, 4 );
+   SerialSendData( getMaxDelta(), 4 );
    Serial.write( ENDOFPCK );
-   SerialSendData( avgdelta, 4 );
-   Serial.write( ENDOFPCK );
-   
+   SerialSendData( getAvgDelta(), 4 );
+   Serial.write( ENDOFPCK );   
 }
 
 void anglesTelemetry(){    
@@ -217,19 +214,11 @@ void PIDTelemetry(){
     // Send PID Values    
     for( i=0; i<2 ; i++ ){
         for( j=0 ; j<3 ; j++ ){
-            int val = getPIDValues( i,j );
-            SerialSendData(val, 4);
+            int val = int(getPIDValues(i,j)*100);
+            SerialSendData(val, 2);
             Serial.write( ENDOFPCK );
         }
     }
-    
-//    Serial.write( TEL_OLEVELS );
-//    
-//    writeDouble( PIDGetPitchOLevel() );
-//    Serial.write( ENDOFPCK );
-//    writeDouble( PIDGetRollOLevel() );
-//    Serial.write( ENDOFPCK );
-    
 }
 
 void accelOffsetsTelemetry(){
@@ -303,7 +292,7 @@ void startTM(){
         
         switch( turn ){
             case 0:
-//                motorsDiffTelemetry();
+                motorsDiffTelemetry();
                 turn++;
                 break;
             case 1:

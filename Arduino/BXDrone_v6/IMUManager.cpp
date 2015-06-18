@@ -69,18 +69,9 @@ void IMUInit(){
 /* Compute the accelerometer readings */
 void computeAccel(){
     
-    /* Convert readings to [G] units */
-//    accelG[0] = double(accel[0])*accelRes[accelCurrentRes]/32767;
-//    accelG[1] = double(accel[1])*accelRes[accelCurrentRes]/32767;
-//    accelG[2] = double(accel[2])*accelRes[accelCurrentRes]/32767;
-    
     /* Calculate pitch and roll angles from accelerometer readings */
     accelPitchAngle = atan2(accel[1], accel[2]);
     accelRollAngle = atan2(accel[0], sqrt(pow(accel[1],2) + pow(accel[2],2)));
-    
-    /* Convert it to degrees */
-//    accelPitchAngle *= 180.0/pi;
-//    accelRollAngle *= 180.0/pi;
 }
 
 /* Compute the gyroscope readings */
@@ -123,12 +114,12 @@ void computeIMU(){
     }    
     
     /* Compute pitch and roll */
-    computeAccel();
+//    computeAccel();
 //    computeGyro();
     
     /* Calculate angles from gyro and acceleroeter readings */
-    pitchAngle = accelPitchAngle; //0.9*(pitchAngle + gyroDPS[1]) + 0.1*accelPitchAngle;
-    rollAngle = accelRollAngle; //0.9*(rollAngle + gyroDPS[0]) + 0.1*accelRollAngle;
+//    pitchAngle = accelPitchAngle; //0.9*(pitchAngle + gyroDPS[1]) + 0.1*accelPitchAngle;
+//    rollAngle = accelRollAngle; //0.9*(rollAngle + gyroDPS[0]) + 0.1*accelRollAngle;
     
     /* Compute offsets if needed */
     if( !gyroOffReady[0] || !gyroOffReady[1] || !gyroOffReady[2] )
@@ -207,6 +198,8 @@ void setGyroLPFAlpha( double alpha ){ ALPHA_GYRO = alpha; }
 /* Getters */
 double getPitch(){ return pitchAngle; }
 double getRoll(){ return rollAngle; }
+int16_t *getAccelValues(){ return accel; }
+int16_t *getGyroValues(){ return gyro; }
 int16_t getRawAccelX(){ return accel[0]; }
 int16_t getRawAccelY(){ return accel[1]; }
 int16_t getRawAccelZ(){ return accel[2]; }

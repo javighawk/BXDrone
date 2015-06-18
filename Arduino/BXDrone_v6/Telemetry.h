@@ -23,16 +23,12 @@
 #define TEL_TIMEOUT       0x03
 #define TEL_PITCH         0x04
 #define TEL_ROLL          0x05
-#define TEL_ACCELX        0x06
-#define TEL_ACCELY        0x07
-#define TEL_ACCELZ        0x08
+#define TEL_ACCEL         0x06
 #define TEL_DIFFMOTOR     0x09
 #define TEL_PIDVALUES     0x0A
 #define TEL_ALPHA_ACCEL   0x0B
 #define TEL_ACCELOFFSETS  0x0C
-#define TEL_GYROX         0x0D
-#define TEL_GYROY         0x0E
-#define TEL_GYROZ         0x0F
+#define TEL_GYRO          0x0D
 //#define TEL_OLEVELS       0x0F
 #define TEL_ALPHA_GYRO    0x10
 #define TEL_ALPHA_DEG     0x11
@@ -43,7 +39,7 @@
 #define ENDOFPCK          0x1B
 #define ENDOFTM           0x05
 #define ESC               0x7E
-#define TELEMETRYTIME       12
+#define TELEMETRYTIME       20
 
 
 /*****************************************/

@@ -43,6 +43,8 @@ void setAccelLPFAlpha( double alpha );
 void setGyroLPFAlpha( double alpha );
 double getPitch();
 double getRoll();
+int16_t *getAccelValues();
+int16_t *getGyroValues();
 int16_t getRawAccelX();
 int16_t getRawAccelY();
 int16_t getRawAccelZ();

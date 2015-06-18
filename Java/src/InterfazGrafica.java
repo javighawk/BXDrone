@@ -494,7 +494,6 @@ public class InterfazGrafica extends JFrame{
         lblP1.setFont(new Font("Courier New", Font.PLAIN, 14));
         
         sliderP1 = new JSlider();
-        sliderP1.setMaximum(20);
         sliderP1.setBounds(28, 19, 123, 23);
         panel_3.add(sliderP1);
         sliderP1.setValue(0);
@@ -545,7 +544,6 @@ public class InterfazGrafica extends JFrame{
         lblI1.setFont(new Font("Courier New", Font.PLAIN, 14));
         
         sliderI1 = new JSlider();
-        sliderI1.setMaximum(20);
         sliderI1.setBounds(28, 42, 123, 23);
         panel_3.add(sliderI1);
         sliderI1.setValue(0);
@@ -596,7 +594,6 @@ public class InterfazGrafica extends JFrame{
         lblD1.setFont(new Font("Courier New", Font.PLAIN, 14));
         
         sliderD1 = new JSlider();
-        sliderD1.setMaximum(20);
         sliderD1.setBounds(28, 64, 123, 23);
         panel_3.add(sliderD1);
         sliderD1.setValue(0);
@@ -658,7 +655,6 @@ public class InterfazGrafica extends JFrame{
         lblP0v.setFont(new Font("Courier New", Font.PLAIN, 14));
         
         sliderP0 = new JSlider();
-        sliderP0.setMaximum(255);
         sliderP0.setBounds(28, 19, 123, 23);
         panel_2.add(sliderP0);
         sliderP0.setValue(0);
@@ -700,7 +696,6 @@ public class InterfazGrafica extends JFrame{
         lblI0v.setFont(new Font("Courier New", Font.PLAIN, 14));
         
         sliderI0 = new JSlider();
-        sliderI0.setMaximum(255);
         sliderI0.setBounds(28, 42, 123, 23);
         panel_2.add(sliderI0);
         sliderI0.setValue(0);
@@ -751,7 +746,6 @@ public class InterfazGrafica extends JFrame{
         lblD0.setFont(new Font("Courier New", Font.PLAIN, 14));
         
         sliderD0 = new JSlider();
-        sliderD0.setMaximum(255);
         sliderD0.setBounds(28, 64, 123, 23);
         panel_2.add(sliderD0);
         sliderD0.setValue(0);

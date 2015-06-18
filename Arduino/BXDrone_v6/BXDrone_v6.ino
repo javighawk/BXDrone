@@ -57,8 +57,8 @@ void setup(){
 }
 
 void loop(){
-    runPitchRoll();
-    if( isBXDMoving() ) 
+    computeIMU();
+    if( isBXDMoving() )
         PIDCompute();
     checkTelemetry();
     if( checkTimeOut() );

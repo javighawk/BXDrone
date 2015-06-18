@@ -58,6 +58,8 @@ void BX_initMoveMode(){
   mOffset[1] = 0;
   mOffset[2] = 0;
   mOffset[3] = 0;
+  
+  PID_setDesiredAngles(0,0);
 }
 
 void runMoveMode(){
@@ -78,17 +80,14 @@ void runMoveMode(){
 
 void ZMoveBot(byte speedT, byte direction){
 
+  PID_setDesiredAngles(0,0);
+  
   switch(direction){
   case 0x00:
     M2Speed += speedT * 5;
     M1Speed += speedT * 5;
     M4Speed += speedT * 5;
     M3Speed += speedT * 5;
-    
-//    setAddingMotorSpeed(1);
-//    setAddingMotorSpeed(2);
-//    setAddingMotorSpeed(3);
-//    setAddingMotorSpeed(4);
     break;
 
   case 0x10:
@@ -96,48 +95,27 @@ void ZMoveBot(byte speedT, byte direction){
     M1Speed -= speedT * 5;
     M4Speed -= speedT * 5;
     M3Speed -= speedT * 5;
-    
-//    setAddingMotorSpeed(1);
-//    setAddingMotorSpeed(2);
-//    setAddingMotorSpeed(3);
-//    setAddingMotorSpeed(4);
     break;
 
-  case 0x20:
-//    setMotorSpeed( 2, totalSpeed + speedT * SPEED_DEVIATION );
-//    setMotorSpeed( 1, totalSpeed - speedT * SPEED_DEVIATION );
-//    setMotorSpeed( 4, totalSpeed + speedT * SPEED_DEVIATION );
-//    setMotorSpeed( 3, totalSpeed - speedT * SPEED_DEVIATION );
-    break;
+  case 0x20: break;
 
-  case 0x30:
-//    setMotorSpeed( 1, totalSpeed + speedT * SPEED_DEVIATION );
-//    setMotorSpeed( 2, totalSpeed - speedT * SPEED_DEVIATION );
-//    setMotorSpeed( 3, totalSpeed + speedT * SPEED_DEVIATION );
-//    setMotorSpeed( 4, totalSpeed - speedT * SPEED_DEVIATION );
-    break;
+  case 0x30: break;
   }
+  
   pendMotorSpeedTM();
 }
 
 void XYMoveBot(byte speedT, byte direction){
 
-    setTotalSpeed(0);
+  setTotalSpeed(0);
+  
   switch(direction){
-  case 0x00:
-    setTotalSpeed(0);
-    break;
-
-  case 0x10:
-    setTotalSpeed(MAX_SPEED);
-    break;
-
-  case 0x20:
-    break;
-
-  case 0x30:
-    break;
+  case 0x00: break;
+  case 0x10: break;
+  case 0x20: break;
+  case 0x30: break;
   }
+  
   pendMotorSpeedTM();
 }
 
@@ -174,9 +152,7 @@ void setMotorSpeed( int motor, int speed ){
 }
 
 void setAddingMotorSpeed( int motor ){
-  
-  if( motor < 1 || motor > 4 ) return;
-  
+
   int mSpeed, diffSpeed;
   
   if( !mPower[motor-1] ){
