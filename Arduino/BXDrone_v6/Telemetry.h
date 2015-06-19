@@ -21,15 +21,12 @@
 #define TEL_SPEED         0x00
 #define TEL_BYTEINFO      0x02
 #define TEL_TIMEOUT       0x03
-#define TEL_PITCH         0x04
-#define TEL_ROLL          0x05
 #define TEL_ACCEL         0x06
 #define TEL_DIFFMOTOR     0x09
 #define TEL_PIDVALUES     0x0A
 #define TEL_ALPHA_ACCEL   0x0B
 #define TEL_ACCELOFFSETS  0x0C
 #define TEL_GYRO          0x0D
-//#define TEL_OLEVELS       0x0F
 #define TEL_ALPHA_GYRO    0x10
 #define TEL_ALPHA_DEG     0x11
 #define TEL_GYROOFFSETS   0x12

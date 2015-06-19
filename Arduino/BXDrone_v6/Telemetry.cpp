@@ -117,7 +117,7 @@ void motorsSpeedTelemetry(){
 
 void motorsDiffTelemetry(){
   
-    // Send differential Motors speed
+    /* Send differential Motors speed */
     int diffMotors[4];
     
     diffMotors[0] = int(getDiffMotor(1) * 100);
@@ -127,16 +127,6 @@ void motorsDiffTelemetry(){
     
     SerialSendData( TEL_DIFFMOTOR, 1 );
     SerialSendData2( (byte *)diffMotors, 8 );
-    
-//    
-//    writeDouble( getDiffMotor(1) );
-//    Serial.write( ENDOFPCK );
-//    writeDouble( getDiffMotor(2) );
-//    Serial.write( ENDOFPCK );
-//    writeDouble( getDiffMotor(3) );
-//    Serial.write( ENDOFPCK );
-//    writeDouble( getDiffMotor(4) );
-//    Serial.write( ENDOFPCK );
 }
   
   
@@ -158,23 +148,6 @@ void accelGyroTelemetry(){
    Serial.write( ENDOFPCK );
    SerialSendData( getAvgDelta(), 4 );
    Serial.write( ENDOFPCK );   
-}
-
-void anglesTelemetry(){    
-  
-    double p = getPitch()*1000;
-    double r = getRoll()*1000;
-    
-    long pint = long(p);
-    long rint = long(r);
-  
-    SerialSendData( TEL_PITCH, 1 );
-    SerialSendData( pint, 4 );
-    Serial.write( ENDOFPCK );
-    SerialSendData( TEL_ROLL, 1 );
-    SerialSendData( rint, 4 );
-    Serial.write( ENDOFPCK );   
-    
 }
 
 void alphaTelemetry(){
@@ -297,10 +270,6 @@ void startTM(){
                 break;
             case 1:
                 accelGyroTelemetry();
-                turn++;
-                break;
-            case 2:
-                anglesTelemetry();
                 turn = 0;
                 break;
         }

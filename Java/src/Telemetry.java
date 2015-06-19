@@ -4,14 +4,11 @@ import java.awt.Color;
 public class Telemetry{
 	
 	public final static byte TEL_SPEED  	  = 0x00;
-	public final static byte TEL_PITCH 		  = 0x04;
-	public final static byte TEL_ROLL  		  = 0x05;
 	public final static byte TEL_ACCEL        = 0x06;
 	public final static byte TEL_DIFFMOTOR    = 0x09;
 	public final static byte TEL_PIDVALUES	  = 0x0A;
 	public final static byte TEL_ALPHA_ACCEL  = 0x0B;
 	public final static byte TEL_ACCELOFFSETS = 0x0C;
-//	public final static byte TEL_0LEVELS	  = 0x0F;
 	public final static byte TEL_GYRO 	      = 0x0D;
 	public final static byte TEL_ALPHA_GYRO	  = 0x10;
 	public final static byte TEL_ALPHA_DEG	  = 0x11;
@@ -30,10 +27,13 @@ public class Telemetry{
 	
 	public static void readTelemetry(){
 		int inputTelemetry, m1=0, m2=0, m3=0, m4=0;
+		short[] accel = new short[3];
+		short[] gyro = new short[3];
+		int delta = 0;
 		
 		while( (inputTelemetry = MainAction.arduino.readData()) != 
 			 (  Telemetry.ENDOFTM + (MainAction.startComm.getNOC_ID() << 4))){
-			
+
 			switch(inputTelemetry){
 				
 				case Telemetry.TEL_SPEED:
@@ -134,28 +134,7 @@ public class Telemetry{
 					MainAction.window1.labelDiffM4.setText(Double.toString(((double)diffMotors[3])/100));
 					break;	
 					
-				case Telemetry.TEL_PITCH:
-					int pitch = 0;
-					while((inputTelemetry = MainAction.arduino.readData()) != Comm.ENDOFPCK)
-						if(inputTelemetry != -1)
-							pitch = (pitch << 8) + inputTelemetry;
-					String p = Double.toString(((double)pitch)/1000) + " º";
-					if (pitch >= 0) p = " " + p;
-					MainAction.window1.labelPitch.setText(p);					
-					break;
-					
-				case Telemetry.TEL_ROLL:
-					int roll = 0;
-					while((inputTelemetry = MainAction.arduino.readData()) != Comm.ENDOFPCK)
-						if(inputTelemetry != -1)
-							roll = (roll << 8) + inputTelemetry;
-					String r = Double.toString(((double)roll)/1000) + " º";
-					if (roll >= 0) r = " " + r;
-					MainAction.window1.labelRoll.setText(r);
-					break;
-					
 				case Telemetry.TEL_ACCEL:
-					short[] accel = new short[3];
 					for( int i=2 ; i>=0 ; i-- ){
 						for( int j=0 ; j<2 ; j++ ){
 							while( (inputTelemetry = MainAction.arduino.readData()) == -1 );
@@ -266,25 +245,7 @@ public class Telemetry{
 					MainAction.window1.sliderOffZ.setValue(aOffZ);
 					break;
 					
-//				case Telemetry.TEL_0LEVELS:
-//					String Opitch = new String();
-//					String Oroll = new String();
-//					
-//					while((inputTelemetry = MainAction.arduino.readData()) != Comm.ENDOFPCK)
-//						if(inputTelemetry != -1)
-//							Opitch += String.valueOf((char)inputTelemetry);
-//					
-//					while((inputTelemetry = MainAction.arduino.readData()) != Comm.ENDOFPCK)
-//						if(inputTelemetry != -1)
-//							Oroll += String.valueOf((char)inputTelemetry);
-//					int Op = (int)(MainAction.strToDouble(Opitch) * 180/3.14159);
-//					int Or = (int)(MainAction.strToDouble(Oroll) * 180/3.14159);
-//					MainAction.window1.lbl0Pitch.setText(Op + " Deg");
-//					MainAction.window1.lbl0Roll.setText(Or + " Deg");		
-//					break;
-					
 				case Telemetry.TEL_GYRO:
-					short[] gyro = new short[3];
 					for( int i=2 ; i>=0 ; i-- ){
 						for( int j=0 ; j<2 ; j++ ){
 							while( (inputTelemetry = MainAction.arduino.readData()) == -1 );
@@ -417,7 +378,7 @@ public class Telemetry{
 					break;
 					
 				case Telemetry.TEL_DELTA:
-					int delta = 0, maxdelta = 0, avgdelta = 0;
+					int maxdelta = 0, avgdelta = 0;
 					while((inputTelemetry = MainAction.arduino.readData()) != Comm.ENDOFPCK)
 							if(inputTelemetry != -1)
 								delta = (delta << 8) + inputTelemetry;
@@ -428,8 +389,31 @@ public class Telemetry{
 						if(inputTelemetry != -1)
 							avgdelta = (avgdelta << 8) + inputTelemetry;
 					System.out.println("DELTA = " + delta + "us, MAXDELTA = " + maxdelta + "us, AVGDELTA = " + avgdelta + "us");
+					calculatePitchRoll(accel, delta);
 					break;					
 			}	
 		}
+	}
+	
+	
+	/*
+	 * Calculate Pitch and Roll angles from the Gyro and Accel data values
+	 */
+	private static void calculatePitchRoll(short[] accel, double delta){
+		
+		double pitchAccel = Math.atan2(accel[1], accel[2]);
+		double rollAccel = Math.atan2(accel[0], Math.sqrt(Math.pow(accel[1],2) + Math.pow(accel[2],2)));
+		
+		pitchAccel *= 180.0/Math.PI;
+		rollAccel *= 180.0/Math.PI;
+		
+		String p = String.format("%1.3f", pitchAccel);
+		String r = String.format("%1.3f", rollAccel);
+		
+		if (pitchAccel >= 0) p = " " + p;
+		if (rollAccel >= 0) r = " " + r;
+		
+		MainAction.window1.labelPitch.setText(p + "º");
+		MainAction.window1.labelRoll.setText(r + "º");
 	}
 }
