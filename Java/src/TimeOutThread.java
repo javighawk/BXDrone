@@ -10,8 +10,8 @@ public class TimeOutThread extends Thread {
 			if(progress){
 				if(System.currentTimeMillis() - time > timeOut){
 					MainAction.window1.println("[NOC]: Connection lost");
-					pause();
 					MainAction.pauseSystem();
+					pause();
 				}
 			}
 			

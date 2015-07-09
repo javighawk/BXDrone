@@ -31,6 +31,10 @@ public class ArduinoKeyListener implements KeyListener{
 	  		case KeyEvent.VK_SPACE:
 	  			MainAction.arduino.setStopAllMotors();
 	  			break;	  	
+		   case KeyEvent.VK_BACK_SPACE:
+	  			MainAction.arduino.setSpin();
+	  			MainAction.arduino.setDirection(Comm.DIR_DOWN);
+	  			break;
 	  		default:
 	  			return;
 	  	  }
@@ -57,7 +61,10 @@ public class ArduinoKeyListener implements KeyListener{
   			break; 		
   		case KeyEvent.VK_SPACE:
   			MainAction.arduino.clearOutputData();
-  			break; 	
+  			break;
+  		case KeyEvent.VK_BACK_SPACE:
+  			MainAction.arduino.clearOutputData();
+  			break;
   		default:
   			return;
     	}

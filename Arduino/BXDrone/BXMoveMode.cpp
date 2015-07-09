@@ -74,8 +74,8 @@ void runMoveMode(){
   else BXDMoving = true;
   
   if( speedInfo == 0 ){ Serial.write(EOT + (getIDvisitor() << 4) ); return; }
-  if(modeInfo == 0) ZMoveBot(speedInfo, directionInfo);
-  else if(modeInfo == 12) XYMoveBot(speedInfo, directionInfo);
+  if( modeInfo == 0 ) ZMoveBot(speedInfo, directionInfo);
+  else if( modeInfo == 12 ) XYMoveBot(speedInfo, directionInfo);
 }
 
 void ZMoveBot(byte speedT, byte direction){
@@ -107,11 +107,11 @@ void ZMoveBot(byte speedT, byte direction){
 
 void XYMoveBot(byte speedT, byte direction){
 
-  setTotalSpeed(0);
+//  setTotalSpeed(0);
   
   switch(direction){
   case 0x00: break;
-  case 0x10: break;
+  case 0x10: setTotalSpeed(MAX_SPEED); break;
   case 0x20: break;
   case 0x30: break;
   }
