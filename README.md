@@ -2,6 +2,8 @@ BXDrone
 =======
 Lastest version of BXDrone software for Arduino and Computer (Java).
 
+IMU used in this version is the MPU9150 purchased in SparkFun (https://www.sparkfun.com/products/11486).
+
 Libraries needed:
 - For the Arduino program: PID library, version 1.0.1: Can be downloaded here http://playground.arduino.cc/Code/PIDLibrary
 
