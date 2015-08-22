@@ -20,7 +20,7 @@ void BX_initCommandMode(){
                           
 void shortCutCommands(){
   
-    digitalWrite(SERIALPIN, HIGH);
+    digitalWrite(SERIALPIN, LOW);
   
     switch(infoByte & COMMAND_SHORTCUT_MASK){
        case SHRTCMD_PID: CMD_PIDValues(); break;
@@ -35,7 +35,7 @@ void shortCutCommands(){
        case SHRTCMD_STOPMOTORS: CMD_StopMotors(); break;
     }
    
-    digitalWrite(SERIALPIN, LOW);
+    digitalWrite(SERIALPIN, HIGH);
 }
 
 

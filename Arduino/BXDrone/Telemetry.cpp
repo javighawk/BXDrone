@@ -138,16 +138,21 @@ void accelGyroTelemetry(){
 
     /* Send Gyro readings */
     SerialSendData( TEL_GYRO, 1 );
-    SerialSendData2( (byte *)getGyroValues(), 6 );
-   
-   /* TEMPORARY */
-   SerialSendData( TEL_DELTA, 1 );
-   SerialSendData( getDelta(), 4 );
-   Serial.write( ENDOFPCK );
-   SerialSendData( getMaxDelta(), 4 );
-   Serial.write( ENDOFPCK );
-   SerialSendData( getAvgDelta(), 4 );
-   Serial.write( ENDOFPCK );   
+    SerialSendData2( (byte *)getGyroValues(), 6 ); 
+}
+
+void timeTelemetry(){
+  
+    /* Send current time and delta, max delta and average delta times */
+    SerialSendData( TEL_TIME, 1 );
+    SerialSendData( millis(), 4 );
+    Serial.write( ENDOFPCK );   
+    SerialSendData( getDelta(), 4 );
+    Serial.write( ENDOFPCK );    
+    SerialSendData( getMaxDelta(), 4 );
+    Serial.write( ENDOFPCK );    
+    SerialSendData( getAvgDelta(), 4 );
+    Serial.write( ENDOFPCK );     
 }
 
 void alphaTelemetry(){
@@ -257,7 +262,7 @@ void motorOffsetsTelemetry(){
 
 void startTM(){  
 
-    digitalWrite(SERIALPIN, HIGH);
+    digitalWrite(SERIALPIN, LOW);
     
     if( pendingTM ){
         byte IDv = getIDvisitor();
@@ -296,12 +301,14 @@ void startTM(){
             motorOffsetsTelemetry();
             pendingMotorOffsetsTM = false;
         }
- 
+        
+    /* Send time information */
+    timeTelemetry();
         
     endTM();       
     
     }
-    digitalWrite(SERIALPIN, LOW);
+    digitalWrite(SERIALPIN, HIGH);
 }
   
 void checkTelemetry(){

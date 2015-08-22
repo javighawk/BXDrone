@@ -94,6 +94,10 @@ public class InterfazGrafica extends JFrame{
     private JPanel panel_11;
     private JPanel panel_13;
     private JLabel label_16;
+    public JProgressBar avgDeltaBar;
+    public JProgressBar maxDeltaBar;
+    public JProgressBar deltaBar;
+    public JLabel labelTime;
     
     /**
      * Constructor. Abre una nueva ventana en la que 
@@ -1692,6 +1696,62 @@ public class InterfazGrafica extends JFrame{
         lblM_1.setFont(new Font("Courier New", Font.PLAIN, 14));
         lblM_1.setBounds(10, 280, 30, 14);
         panel_12.add(lblM_1);
+        
+        JPanel panel_17 = new JPanel();
+        panel_17.setLayout(null);
+        panel_17.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "Time data", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+        panel_17.setBounds(400, 415, 241, 122);
+        panel_1.add(panel_17);
+        
+        JLabel lblTime = new JLabel("Time:");
+        lblTime.setFont(new Font("Courier New", Font.PLAIN, 14));
+        lblTime.setBounds(10, 21, 58, 14);
+        panel_17.add(lblTime);
+        
+        labelTime = new JLabel("0");
+        labelTime.setFont(new Font("Courier New", Font.PLAIN, 14));
+        labelTime.setBounds(53, 21, 68, 14);
+        panel_17.add(labelTime);
+        
+        deltaBar = new JProgressBar();
+        deltaBar.setToolTipText("");
+        deltaBar.setForeground(new Color(255, 165, 0));
+        deltaBar.setString("0");
+        deltaBar.setStringPainted(true);
+        deltaBar.setMaximum(3000);
+        deltaBar.setBounds(112, 46, 116, 14);
+        panel_17.add(deltaBar);
+        
+        JLabel lblDeltaTime = new JLabel("Delta time:");
+        lblDeltaTime.setFont(new Font("Courier New", Font.PLAIN, 14));
+        lblDeltaTime.setBounds(10, 46, 111, 14);
+        panel_17.add(lblDeltaTime);
+        
+        JLabel lblMaxDelta = new JLabel("Max Delta:");
+        lblMaxDelta.setFont(new Font("Courier New", Font.PLAIN, 14));
+        lblMaxDelta.setBounds(10, 71, 111, 14);
+        panel_17.add(lblMaxDelta);
+        
+        JLabel lblAvgDelta = new JLabel("Avg Delta:");
+        lblAvgDelta.setFont(new Font("Courier New", Font.PLAIN, 14));
+        lblAvgDelta.setBounds(10, 96, 111, 14);
+        panel_17.add(lblAvgDelta);
+        
+        maxDeltaBar = new JProgressBar();
+        maxDeltaBar.setString("0");
+        maxDeltaBar.setStringPainted(true);
+        maxDeltaBar.setForeground(new Color(255, 165, 0));
+        maxDeltaBar.setMaximum(3000);
+        maxDeltaBar.setBounds(112, 71, 116, 14);
+        panel_17.add(maxDeltaBar);
+        
+        avgDeltaBar = new JProgressBar();
+        avgDeltaBar.setForeground(new Color(255, 165, 0));
+        avgDeltaBar.setStringPainted(true);
+        avgDeltaBar.setString("0\r\n");
+        avgDeltaBar.setMaximum(3000);
+        avgDeltaBar.setBounds(112, 96, 116, 14);
+        panel_17.add(avgDeltaBar);
         
         btnTestM2.addActionListener(new ActionListener(){
         	public void actionPerformed(ActionEvent arg0){

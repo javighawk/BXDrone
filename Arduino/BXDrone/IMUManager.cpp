@@ -113,14 +113,6 @@ void computeIMU(){
         compute = 0;
     }    
     
-    /* Compute pitch and roll */
-//    computeAccel();
-//    computeGyro();
-    
-    /* Calculate angles from gyro and acceleroeter readings */
-//    pitchAngle = accelPitchAngle; //0.9*(pitchAngle + gyroDPS[1]) + 0.1*accelPitchAngle;
-//    rollAngle = accelRollAngle; //0.9*(rollAngle + gyroDPS[0]) + 0.1*accelRollAngle;
-    
     /* Compute offsets if needed */
     if( !gyroOffReady[0] || !gyroOffReady[1] || !gyroOffReady[2] )
         computeGyroOffsets();
@@ -223,8 +215,6 @@ int getGyroOffsetZ(){ return gyroOffsets[2]; }
 double getDegLPFAlpha(){ return ALPHA_DEG; }
 double getGyroLPFAlpha(){ return ALPHA_GYRO; }
 double getAccelLPFAlpha(){ return ALPHA_ACCEL; }
-
-/* TEMPORARY FUNCTIONS */
 unsigned long getDelta(){ return delta; }
 unsigned long getAvgDelta(){ return avgDelta; }
 unsigned long getMaxDelta(){

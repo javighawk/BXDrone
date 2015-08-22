@@ -17,24 +17,52 @@ public class Telemetry{
 	public final static byte TEL_MOTOROFFSETS = 0x14;
 	public final static byte TEL_ACCELRES	  = 0x15;
 	public final static byte TEL_GYRORES      = 0x16;
-	public final static int TEL_DELTA		  = 0x99;		/* TEMPORARY */
+	public final static int  TEL_TIME		  = 0x17;		/* TEMPORARY */
 	public final static byte ENDOFTM		  = 0x05;
 	
 	private final static int[] accelRes = {2, 4, 8, 16},
 							   gyroRes = {250, 500, 1000, 2000};
 	private static int currentAccelRes = 0,
 					   currentGyroRes = 0;
+	private static long time, delta, maxDelta, avgDelta;
 	
 	public static void readTelemetry(){
 		int inputTelemetry, m1=0, m2=0, m3=0, m4=0;
 		short[] accel = new short[3];
 		short[] gyro = new short[3];
-		int delta = 0;
 		
 		while( (inputTelemetry = MainAction.arduino.readData()) != 
 			 (  Telemetry.ENDOFTM + (MainAction.startComm.getNOC_ID() << 4))){
 
 			switch(inputTelemetry){
+			
+				case Telemetry.TEL_TIME:
+					time = 0;
+					delta = 0;
+					maxDelta = 0;
+					avgDelta = 0;
+					while((inputTelemetry = MainAction.arduino.readData()) != Comm.ENDOFPCK)
+						if(inputTelemetry != -1)
+							time = (time << 8) + inputTelemetry;
+					while((inputTelemetry = MainAction.arduino.readData()) != Comm.ENDOFPCK)
+						if(inputTelemetry != -1)
+							delta = (delta << 8) + inputTelemetry;
+					while((inputTelemetry = MainAction.arduino.readData()) != Comm.ENDOFPCK)
+						if(inputTelemetry != -1)
+							maxDelta = (maxDelta << 8) + inputTelemetry;
+					while((inputTelemetry = MainAction.arduino.readData()) != Comm.ENDOFPCK)
+						if(inputTelemetry != -1)
+							avgDelta = (avgDelta << 8) + inputTelemetry;
+					long second = (time / 1000) % 60;
+					long minute = (time / (1000 * 60));
+					MainAction.window1.labelTime.setText(Long.toString(minute) + ":" + Long.toString(second));
+					MainAction.window1.deltaBar.setValue((int)delta);
+					MainAction.window1.deltaBar.setString(Long.toString(delta) + " us");
+					MainAction.window1.maxDeltaBar.setValue((int)maxDelta);
+					MainAction.window1.maxDeltaBar.setString(Long.toString(maxDelta) + " us");
+					MainAction.window1.avgDeltaBar.setValue((int)avgDelta);
+					MainAction.window1.avgDeltaBar.setString(Long.toString(avgDelta) + " us");
+					break;	
 				
 				case Telemetry.TEL_SPEED:
 					while((inputTelemetry = MainAction.arduino.readData()) != Comm.ENDOFPCK)
@@ -263,6 +291,7 @@ public class Telemetry{
 					MainAction.window1.labelGyroX.setText(sgX);
 					MainAction.window1.labelGyroY.setText(sgY);
 					MainAction.window1.labelGyroZ.setText(sgZ);
+					calculatePitchRoll(accel, delta);
 					break;
 					
 
@@ -375,22 +404,7 @@ public class Telemetry{
 					while((inputTelemetry = MainAction.arduino.readData()) != Comm.ENDOFPCK)
 						if(inputTelemetry != -1)
 							currentGyroRes = inputTelemetry;
-					break;
-					
-				case Telemetry.TEL_DELTA:
-					int maxdelta = 0, avgdelta = 0;
-					while((inputTelemetry = MainAction.arduino.readData()) != Comm.ENDOFPCK)
-							if(inputTelemetry != -1)
-								delta = (delta << 8) + inputTelemetry;
-						while((inputTelemetry = MainAction.arduino.readData()) != Comm.ENDOFPCK)
-						if(inputTelemetry != -1)
-							maxdelta = (maxdelta << 8) + inputTelemetry;
-					while((inputTelemetry = MainAction.arduino.readData()) != Comm.ENDOFPCK)
-						if(inputTelemetry != -1)
-							avgdelta = (avgdelta << 8) + inputTelemetry;
-					System.out.println("DELTA = " + delta + "us, MAXDELTA = " + maxdelta + "us, AVGDELTA = " + avgdelta + "us");
-					calculatePitchRoll(accel, delta);
-					break;					
+					break;				
 			}	
 		}
 	}
