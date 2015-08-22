@@ -4,50 +4,55 @@ import java.awt.Color;
 public class Telemetry{
 	
 	public final static byte TEL_SPEED  	  = 0x00;
-	public final static byte TEL_PITCH 		  = 0x04;
-	public final static byte TEL_ROLL  		  = 0x05;
-	public final static byte TEL_X     	 	  = 0x06;
-	public final static byte TEL_Y   		  = 0x07;
-	public final static byte TEL_Z		      = 0x08;
+	public final static byte TEL_ACCEL        = 0x06;
 	public final static byte TEL_DIFFMOTOR    = 0x09;
 	public final static byte TEL_PIDVALUES	  = 0x0A;
 	public final static byte TEL_ALPHA_ACCEL  = 0x0B;
-	public final static byte TEL_OFFSETS	  = 0x0C;
-	public final static byte TEL_0LEVELS	  = 0x0F;
-	public final static byte TEL_DELTAPITCH	  = 0x0D;
-	public final static byte TEL_DELTAROLL    = 0x0E;
+	public final static byte TEL_ACCELOFFSETS = 0x0C;
+	public final static byte TEL_GYRO 	      = 0x0D;
 	public final static byte TEL_ALPHA_GYRO	  = 0x10;
 	public final static byte TEL_ALPHA_DEG	  = 0x11;
-	public final static byte TEL_STILLLEVELS  = 0x12;
+	public final static byte TEL_GYROOFFSETS  = 0x12;
 	public final static byte TEL_MOTORSPOWER  = 0x13;
 	public final static byte TEL_MOTOROFFSETS = 0x14;
+	public final static byte TEL_ACCELRES	  = 0x15;
+	public final static byte TEL_GYRORES      = 0x16;
+	public final static int TEL_DELTA		  = 0x99;		/* TEMPORARY */
 	public final static byte ENDOFTM		  = 0x05;
+	
+	private final static int[] accelRes = {2, 4, 8, 16},
+							   gyroRes = {250, 500, 1000, 2000};
+	private static int currentAccelRes = 0,
+					   currentGyroRes = 0;
 	
 	public static void readTelemetry(){
 		int inputTelemetry, m1=0, m2=0, m3=0, m4=0;
+		short[] accel = new short[3];
+		short[] gyro = new short[3];
+		int delta = 0;
 		
 		while( (inputTelemetry = MainAction.arduino.readData()) != 
 			 (  Telemetry.ENDOFTM + (MainAction.startComm.getNOC_ID() << 4))){
-			
+
 			switch(inputTelemetry){
 				
 				case Telemetry.TEL_SPEED:
-					while((inputTelemetry = MainAction.arduino.readData()) != MainAction.arduino.ENDOFPCK)
+					while((inputTelemetry = MainAction.arduino.readData()) != Comm.ENDOFPCK)
 						if(inputTelemetry != -1)
 							m1 = (m1 << 8) + inputTelemetry;
 					MainAction.window1.labelM1v.setText(Integer.toString(m1));
 					
-					while((inputTelemetry = MainAction.arduino.readData()) != MainAction.arduino.ENDOFPCK)
+					while((inputTelemetry = MainAction.arduino.readData()) != Comm.ENDOFPCK)
 						if(inputTelemetry != -1)
 							m2 = (m2 << 8) + inputTelemetry;
 					MainAction.window1.labelM2v.setText(Integer.toString(m2));
 					
-					while((inputTelemetry = MainAction.arduino.readData()) != MainAction.arduino.ENDOFPCK)
+					while((inputTelemetry = MainAction.arduino.readData()) != Comm.ENDOFPCK)
 						if(inputTelemetry != -1)
 							m3 = (m3 << 8) + inputTelemetry;
 					MainAction.window1.labelM3v.setText(Integer.toString(m3));
 					
-					while((inputTelemetry = MainAction.arduino.readData()) != MainAction.arduino.ENDOFPCK)
+					while((inputTelemetry = MainAction.arduino.readData()) != Comm.ENDOFPCK)
 						if(inputTelemetry != -1)
 							m4 = (m4 << 8) + inputTelemetry;
 					MainAction.window1.labelM4v.setText(Integer.toString(m4));
@@ -64,7 +69,11 @@ public class Telemetry{
 						MainAction.window1.sliderOffX.setEnabled(true);
 						MainAction.window1.sliderOffY.setEnabled(true);
 						MainAction.window1.sliderOffZ.setEnabled(true);
+						MainAction.window1.sliderGOffX.setEnabled(true);
+						MainAction.window1.sliderGOffY.setEnabled(true);
+						MainAction.window1.sliderGOffZ.setEnabled(true);
 						MainAction.window1.btnDefaultOffsets.setEnabled(true);
+						MainAction.window1.defaultGOffsets.setEnabled(true);
 						MainAction.window1.btnSetLevel.setEnabled(true);
 						MainAction.window1.btnSetGround.setEnabled(true);
 						MainAction.window1.btnSetStillLevel.setEnabled(true);
@@ -88,7 +97,11 @@ public class Telemetry{
 						MainAction.window1.sliderOffX.setEnabled(false);
 						MainAction.window1.sliderOffY.setEnabled(false);
 						MainAction.window1.sliderOffZ.setEnabled(false);
+						MainAction.window1.sliderGOffX.setEnabled(false);
+						MainAction.window1.sliderGOffY.setEnabled(false);
+						MainAction.window1.sliderGOffZ.setEnabled(false);
 						MainAction.window1.btnDefaultOffsets.setEnabled(false);
+						MainAction.window1.defaultGOffsets.setEnabled(false);
 						MainAction.window1.btnSetLevel.setEnabled(false);
 						MainAction.window1.btnSetGround.setEnabled(false);
 						MainAction.window1.btnSetStillLevel.setEnabled(false);
@@ -106,88 +119,47 @@ public class Telemetry{
 					
 				
 				case Telemetry.TEL_DIFFMOTOR:
-					String dm1 = new String();	
-						while((inputTelemetry = MainAction.arduino.readData()) != MainAction.arduino.ENDOFPCK)
-							if(inputTelemetry != -1)
-								dm1 += String.valueOf((char)inputTelemetry);
-					MainAction.window1.labelDiffM1.setText(dm1);
-				
-					String dm2 = new String();	
-						while((inputTelemetry = MainAction.arduino.readData()) != MainAction.arduino.ENDOFPCK)
-							if(inputTelemetry != -1)
-								dm2 += String.valueOf((char)inputTelemetry);
-					MainAction.window1.labelDiffM2.setText(dm2);
-					
-					String dm3 = new String();	
-						while((inputTelemetry = MainAction.arduino.readData()) != MainAction.arduino.ENDOFPCK)
-							if(inputTelemetry != -1)
-								dm3 += String.valueOf((char)inputTelemetry);
-						MainAction.window1.labelDiffM3.setText(dm3);
-							
-					String dm4 = new String();	
-					while((inputTelemetry = MainAction.arduino.readData()) != MainAction.arduino.ENDOFPCK)
-						if(inputTelemetry != -1)
-							dm4 += String.valueOf((char)inputTelemetry);
-						MainAction.window1.labelDiffM4.setText(dm4);
-					
+					short[] diffMotors = new short[4];
+					for( int i=3 ; i>=0 ; i-- ){
+						for( int j=0 ; j<2 ; j++ ){
+							while( (inputTelemetry = MainAction.arduino.readData()) == -1 );
+							if( inputTelemetry == Comm.ENDOFPCK ) break;
+							diffMotors[i] = (short) ((diffMotors[i] << 8) + inputTelemetry);
+						}
+						if( inputTelemetry == Comm.ENDOFPCK ) break;
+					}	
+					MainAction.window1.labelDiffM1.setText(Double.toString(((double)diffMotors[0])/100));
+					MainAction.window1.labelDiffM2.setText(Double.toString(((double)diffMotors[1])/100));
+					MainAction.window1.labelDiffM3.setText(Double.toString(((double)diffMotors[2])/100));
+					MainAction.window1.labelDiffM4.setText(Double.toString(((double)diffMotors[3])/100));
 					break;	
 					
-					
-					
-					
-					
-				case Telemetry.TEL_PITCH:
-					String pitch = new String();
-					while((inputTelemetry = MainAction.arduino.readData()) != MainAction.arduino.ENDOFPCK)
-						if(inputTelemetry != -1)
-							pitch += String.valueOf((char)inputTelemetry);
-					MainAction.window1.labelPitch.setText(pitch + " Rad");
-					
+				case Telemetry.TEL_ACCEL:
+					for( int i=2 ; i>=0 ; i-- ){
+						for( int j=0 ; j<2 ; j++ ){
+							while( (inputTelemetry = MainAction.arduino.readData()) == -1 );
+							if( inputTelemetry == Comm.ENDOFPCK ) break;
+							accel[i] = (short) ((accel[i] << 8) + inputTelemetry);
+						}
+						if( inputTelemetry == Comm.ENDOFPCK ) break;
+					}							
+					String saX = String.format("%1.3f", (double)accel[0]*accelRes[currentAccelRes]/0x7FFF);
+					String saY = String.format("%1.3f", (double)accel[1]*accelRes[currentAccelRes]/0x7FFF);
+					String saZ = String.format("%1.3f", (double)accel[2]*accelRes[currentAccelRes]/0x7FFF);
+					if (accel[0] >= 0) saX = " " + saX;
+					if (accel[1] >= 0) saY = " " + saY;
+					if (accel[2] >= 0) saZ = " " + saZ;
+					MainAction.window1.labelX.setText(saX);
+					MainAction.window1.labelY.setText(saY);
+					MainAction.window1.labelZ.setText(saZ);
 					break;
-					
-				case Telemetry.TEL_ROLL:
-					String roll = new String();
-					while((inputTelemetry = MainAction.arduino.readData()) != MainAction.arduino.ENDOFPCK)
-						if(inputTelemetry != -1)
-							roll += String.valueOf((char)inputTelemetry);
-					MainAction.window1.labelRoll.setText(roll + " Rad");
-					
-					break;
-					
-				case Telemetry.TEL_X:
-					String X = new String();
-					while((inputTelemetry = MainAction.arduino.readData()) != MainAction.arduino.ENDOFPCK)
-						if(inputTelemetry != -1)
-							X += String.valueOf((char)inputTelemetry);
-					MainAction.window1.labelX.setText(X + " G");
-					
-					break;
-					
-				case Telemetry.TEL_Y:
-					String Y = new String();
-					while((inputTelemetry = MainAction.arduino.readData()) != MainAction.arduino.ENDOFPCK)
-						if(inputTelemetry != -1)
-							Y += String.valueOf((char)inputTelemetry);
-					MainAction.window1.labelY.setText(Y + " G");
-					
-					break;
-					
-				case Telemetry.TEL_Z:
-					String Z = new String();
-					while((inputTelemetry = MainAction.arduino.readData()) != MainAction.arduino.ENDOFPCK)
-						if(inputTelemetry != -1)
-							Z += String.valueOf((char)inputTelemetry);
-					MainAction.window1.labelZ.setText(Z + " G");
-					
-					break;
-					
 					
 					
 				case Telemetry.TEL_PIDVALUES:
 					
 					int[][] PIDKv = new int[2][3];
 					
-					while((inputTelemetry = MainAction.arduino.readData()) != MainAction.arduino.ENDOFPCK)
+					while((inputTelemetry = MainAction.arduino.readData()) != Comm.ENDOFPCK)
 						if(inputTelemetry != -1)
 							if(inputTelemetry == 0){
 								MainAction.window1.lblPID.setText("OFF");
@@ -199,18 +171,18 @@ public class Telemetry{
 
 					for(int i=0 ; i<2; i++){
 						for(int j=0 ; j<3 ; j++){
-							while((inputTelemetry = MainAction.arduino.readData()) != MainAction.arduino.ENDOFPCK)
+							while((inputTelemetry = MainAction.arduino.readData()) != Comm.ENDOFPCK)
 								if(inputTelemetry != -1)
 									PIDKv[i][j] = (PIDKv[i][j] << 8) + inputTelemetry;						
 						}
 					}
 					
-					MainAction.window1.lblP0v.setText(Integer.toString(PIDKv[0][0]));
-					MainAction.window1.lblI0v.setText(Integer.toString(PIDKv[0][1]));
-					MainAction.window1.lblD0v.setText(Integer.toString(PIDKv[0][2]));
-					MainAction.window1.lblP1v.setText(Integer.toString(PIDKv[1][0]));
-					MainAction.window1.lblI1v.setText(Integer.toString(PIDKv[1][1]));
-					MainAction.window1.lblD1v.setText(Integer.toString(PIDKv[1][2]));
+					MainAction.window1.lblP0v.setText(Double.toString(((double)PIDKv[0][0])/100));
+					MainAction.window1.lblI0v.setText(Double.toString(((double)PIDKv[0][1])/100));
+					MainAction.window1.lblD0v.setText(Double.toString(((double)PIDKv[0][2])/100));
+					MainAction.window1.lblP1v.setText(Double.toString(((double)PIDKv[1][0])/100));
+					MainAction.window1.lblI1v.setText(Double.toString(((double)PIDKv[1][1])/100));
+					MainAction.window1.lblD1v.setText(Double.toString(((double)PIDKv[1][2])/100));
 					
 					MainAction.window1.sliderP0.setValue(PIDKv[0][0]);
 					MainAction.window1.sliderI0.setValue(PIDKv[0][1]);
@@ -222,119 +194,99 @@ public class Telemetry{
 					break;
 					
 				case Telemetry.TEL_ALPHA_ACCEL:
-					String alphaAccel = new String();
-					while((inputTelemetry = MainAction.arduino.readData()) != MainAction.arduino.ENDOFPCK)
+					double alphaAccel = 0;
+					while((inputTelemetry = MainAction.arduino.readData()) != Comm.ENDOFPCK)
 						if(inputTelemetry != -1)
-							alphaAccel += String.valueOf((char)inputTelemetry);
-					MainAction.window1.lblAlphaAccel.setText(alphaAccel);
+							alphaAccel = ((double)inputTelemetry)/100;
+					MainAction.window1.lblAlphaAccel.setText(Double.toString(alphaAccel));
+					MainAction.window1.sliderAlphaAccel.setValue((int)(alphaAccel*100));
 					break;
 					
 				case Telemetry.TEL_ALPHA_GYRO:
-					String alphaGyro = new String();
-					while((inputTelemetry = MainAction.arduino.readData()) != MainAction.arduino.ENDOFPCK)
+					double alphaGyro = 0;
+					while((inputTelemetry = MainAction.arduino.readData()) != Comm.ENDOFPCK)
 						if(inputTelemetry != -1)
-							alphaGyro += String.valueOf((char)inputTelemetry);
-					MainAction.window1.lblAlphaGyro.setText(alphaGyro);
+							alphaGyro = ((double)inputTelemetry)/100;;
+					MainAction.window1.lblAlphaGyro.setText(Double.toString(alphaGyro));
+					MainAction.window1.sliderAlphaGyro.setValue((int)(alphaGyro*100));
 					break;
 					
 				case Telemetry.TEL_ALPHA_DEG:
-					String alphaDeg = new String();
-					while((inputTelemetry = MainAction.arduino.readData()) != MainAction.arduino.ENDOFPCK)
+					double alphaDeg = 0;
+					while((inputTelemetry = MainAction.arduino.readData()) != Comm.ENDOFPCK)
 						if(inputTelemetry != -1)
-							alphaDeg += String.valueOf((char)inputTelemetry);
-					MainAction.window1.lblAlphaDeg.setText(alphaDeg);
+							alphaDeg = ((double)inputTelemetry)/100;
+					MainAction.window1.lblAlphaDeg.setText(Double.toString(alphaDeg));
+					MainAction.window1.sliderAlphaDeg.setValue((int)(alphaDeg*100));
 					break;
 					
 					
 					
-				case Telemetry.TEL_OFFSETS:
-					byte offX=0, offY=0, offZ=0;
+				case Telemetry.TEL_ACCELOFFSETS:
+					short aOffX=0, aOffY=0, aOffZ=0;
 					
-					while((inputTelemetry = MainAction.arduino.readData()) != MainAction.arduino.ENDOFPCK)
+					while((inputTelemetry = MainAction.arduino.readData()) != Comm.ENDOFPCK)
 						if(inputTelemetry != -1)
-							offX = (byte) ((offX << 8) + inputTelemetry);
+							aOffX = (short) ((aOffX << 8) + inputTelemetry);
 					
-					while((inputTelemetry = MainAction.arduino.readData()) != MainAction.arduino.ENDOFPCK)
+					while((inputTelemetry = MainAction.arduino.readData()) != Comm.ENDOFPCK)
 						if(inputTelemetry != -1)
-							offY = (byte) ((offY << 8) + inputTelemetry);
+							aOffY = (short) ((aOffY << 8) + inputTelemetry);
 					
-					while((inputTelemetry = MainAction.arduino.readData()) != MainAction.arduino.ENDOFPCK)
+					while((inputTelemetry = MainAction.arduino.readData()) != Comm.ENDOFPCK)
 						if(inputTelemetry != -1)
-							offZ = (byte) ((offZ << 8) + inputTelemetry);		
+							aOffZ = (short) ((aOffZ << 8) + inputTelemetry);
 					
-					MainAction.window1.lblOffX.setText(Integer.toString(offX));
-					MainAction.window1.lblOffY.setText(Integer.toString(offY));
-					MainAction.window1.lblOffZ.setText(Integer.toString(offZ));
-					MainAction.window1.sliderOffX.setValue(offX);
-					MainAction.window1.sliderOffY.setValue(offY);
-					MainAction.window1.sliderOffZ.setValue(offZ);
+					MainAction.window1.lblOffX.setText(Integer.toString(aOffX));
+					MainAction.window1.lblOffY.setText(Integer.toString(aOffY));
+					MainAction.window1.lblOffZ.setText(Integer.toString(aOffZ));
+					MainAction.window1.sliderOffX.setValue(aOffX);
+					MainAction.window1.sliderOffY.setValue(aOffY);
+					MainAction.window1.sliderOffZ.setValue(aOffZ);
 					break;
 					
-				case Telemetry.TEL_0LEVELS:
-					String Opitch = new String();
-					String Oroll = new String();
-					
-					while((inputTelemetry = MainAction.arduino.readData()) != MainAction.arduino.ENDOFPCK)
-						if(inputTelemetry != -1)
-							Opitch += String.valueOf((char)inputTelemetry);
-					
-					while((inputTelemetry = MainAction.arduino.readData()) != MainAction.arduino.ENDOFPCK)
-						if(inputTelemetry != -1)
-							Oroll += String.valueOf((char)inputTelemetry);
-					int Op = (int)(MainAction.strToDouble(Opitch) * 180/3.14159);
-					int Or = (int)(MainAction.strToDouble(Oroll) * 180/3.14159);
-					MainAction.window1.lbl0Pitch.setText(Op + " Deg");
-					MainAction.window1.lbl0Roll.setText(Or + " Deg");		
+				case Telemetry.TEL_GYRO:
+					for( int i=2 ; i>=0 ; i-- ){
+						for( int j=0 ; j<2 ; j++ ){
+							while( (inputTelemetry = MainAction.arduino.readData()) == -1 );
+							if( inputTelemetry == Comm.ENDOFPCK ) break;
+							gyro[i] = (short) ((gyro[i] << 8) + inputTelemetry);
+						}
+						if( inputTelemetry == Comm.ENDOFPCK ) break;
+					}							
+					String sgX = String.format("%1.3f", (double)gyro[0]*gyroRes[currentGyroRes]/0x7FFF);
+					String sgY = String.format("%1.3f", (double)gyro[1]*gyroRes[currentGyroRes]/0x7FFF);
+					String sgZ = String.format("%1.3f", (double)gyro[2]*gyroRes[currentGyroRes]/0x7FFF);
+					if (gyro[0] >= 0) sgX = " " + sgX;
+					if (gyro[1] >= 0) sgY = " " + sgY;
+					if (gyro[2] >= 0) sgZ = " " + sgZ;
+					MainAction.window1.labelGyroX.setText(sgX);
+					MainAction.window1.labelGyroY.setText(sgY);
+					MainAction.window1.labelGyroZ.setText(sgZ);
 					break;
 					
-				case Telemetry.TEL_DELTAPITCH:
-					String dPitch = new String();
+
+				case Telemetry.TEL_GYROOFFSETS:
+					short gXOff=0, gYOff=0, gZOff=0;
 					
-					while((inputTelemetry = MainAction.arduino.readData()) != MainAction.arduino.ENDOFPCK)
+					while((inputTelemetry = MainAction.arduino.readData()) != Comm.ENDOFPCK)
 						if(inputTelemetry != -1)
-							dPitch += String.valueOf((char)inputTelemetry);
-					//int dP = (int)(MainAction.strToDouble(dPitch) * 180/3.14159);
-					MainAction.window1.lblDeltaPitch.setText(dPitch + " Rad/s");
-//					byte dPitch = 0;
-//					
-//					while((inputTelemetry = MainAction.arduino.readData()) != MainAction.arduino.ENDOFPCK)
-//						if(inputTelemetry != -1)
-//							dPitch = (byte) ((dPitch << 8) + inputTelemetry);
-//					MainAction.window1.lblDeltaPitch.setText(Integer.toString(dPitch));
-					break;
+							gXOff = (short) ((gXOff << 8) + inputTelemetry);
 					
-				case Telemetry.TEL_DELTAROLL:
-					String dRoll = new String();
-					
-					while((inputTelemetry = MainAction.arduino.readData()) != MainAction.arduino.ENDOFPCK)
+					while((inputTelemetry = MainAction.arduino.readData()) != Comm.ENDOFPCK)
 						if(inputTelemetry != -1)
-							dRoll += String.valueOf((char)inputTelemetry);
-					//int dR = (int)(MainAction.strToDouble(dRoll) * 180/3.14159);
-					MainAction.window1.lblDeltaRoll.setText(dRoll + " Rad/s");
-//					byte dRoll = 0;
-//					
-//					while((inputTelemetry = MainAction.arduino.readData()) != MainAction.arduino.ENDOFPCK)
-//						if(inputTelemetry != -1)
-//							dRoll = (byte) ((dRoll << 8) + inputTelemetry);
-//					MainAction.window1.lblDeltaRoll.setText(Integer.toString(dRoll));
-					break;
+							gYOff = (short) ((gYOff << 8) + inputTelemetry);
 					
-					
-					
-				case Telemetry.TEL_STILLLEVELS:
-					String XMed = new String();
-					String ZMed = new String();
-					
-					while((inputTelemetry = MainAction.arduino.readData()) != MainAction.arduino.ENDOFPCK)
+					while((inputTelemetry = MainAction.arduino.readData()) != Comm.ENDOFPCK)
 						if(inputTelemetry != -1)
-							XMed += String.valueOf((char)inputTelemetry);
+							gZOff = (short) ((gZOff << 8) + inputTelemetry);
 					
-					while((inputTelemetry = MainAction.arduino.readData()) != MainAction.arduino.ENDOFPCK)
-						if(inputTelemetry != -1)
-							ZMed += String.valueOf((char)inputTelemetry);
-					
-					MainAction.window1.lblGyroXMed.setText(XMed);
-					MainAction.window1.lblGyroZMed.setText(ZMed);
+					MainAction.window1.lblGOffX.setText(Integer.toString(gXOff));
+					MainAction.window1.lblGOffY.setText(Integer.toString(gYOff));
+					MainAction.window1.lblGOffZ.setText(Integer.toString(gZOff));
+					MainAction.window1.sliderGOffX.setValue(gXOff);
+					MainAction.window1.sliderGOffY.setValue(gYOff);
+					MainAction.window1.sliderGOffZ.setValue(gZOff);
 					break;
 					
 				
@@ -342,16 +294,16 @@ public class Telemetry{
 					
 					int m1p=0, m2p=0, m3p=0, m4p=0;
 					
-					while((inputTelemetry = MainAction.arduino.readData()) != MainAction.arduino.ENDOFPCK)
+					while((inputTelemetry = MainAction.arduino.readData()) != Comm.ENDOFPCK)
 						if(inputTelemetry != -1)
 							m1p = inputTelemetry;
-					while((inputTelemetry = MainAction.arduino.readData()) != MainAction.arduino.ENDOFPCK)
+					while((inputTelemetry = MainAction.arduino.readData()) != Comm.ENDOFPCK)
 						if(inputTelemetry != -1)
 							m2p = inputTelemetry;
-					while((inputTelemetry = MainAction.arduino.readData()) != MainAction.arduino.ENDOFPCK)
+					while((inputTelemetry = MainAction.arduino.readData()) != Comm.ENDOFPCK)
 						if(inputTelemetry != -1)
 							m3p = inputTelemetry;
-					while((inputTelemetry = MainAction.arduino.readData()) != MainAction.arduino.ENDOFPCK)
+					while((inputTelemetry = MainAction.arduino.readData()) != Comm.ENDOFPCK)
 						if(inputTelemetry != -1)
 							m4p = inputTelemetry;
 					
@@ -390,16 +342,16 @@ public class Telemetry{
 					
 					byte m1off=0, m2off=0, m3off=0, m4off=0;
 					
-					while((inputTelemetry = MainAction.arduino.readData()) != MainAction.arduino.ENDOFPCK)
+					while((inputTelemetry = MainAction.arduino.readData()) != Comm.ENDOFPCK)
 						if(inputTelemetry != -1)
 							m1off = (byte) inputTelemetry;
-					while((inputTelemetry = MainAction.arduino.readData()) != MainAction.arduino.ENDOFPCK)
+					while((inputTelemetry = MainAction.arduino.readData()) != Comm.ENDOFPCK)
 						if(inputTelemetry != -1)
 							m2off = (byte) inputTelemetry;
-					while((inputTelemetry = MainAction.arduino.readData()) != MainAction.arduino.ENDOFPCK)
+					while((inputTelemetry = MainAction.arduino.readData()) != Comm.ENDOFPCK)
 						if(inputTelemetry != -1)
 							m3off = (byte) inputTelemetry;
-					while((inputTelemetry = MainAction.arduino.readData()) != MainAction.arduino.ENDOFPCK)
+					while((inputTelemetry = MainAction.arduino.readData()) != Comm.ENDOFPCK)
 						if(inputTelemetry != -1)
 							m4off = (byte) inputTelemetry;
 					
@@ -412,17 +364,56 @@ public class Telemetry{
 					MainAction.window1.sldOffM3.setValue(m3off);
 					MainAction.window1.sldOffM4.setValue(m4off);
 					break;
-			}
-			
+					
+				case Telemetry.TEL_ACCELRES:
+					while((inputTelemetry = MainAction.arduino.readData()) != Comm.ENDOFPCK)
+						if(inputTelemetry != -1)
+							currentAccelRes = inputTelemetry;
+					break;
+					
+				case Telemetry.TEL_GYRORES:
+					while((inputTelemetry = MainAction.arduino.readData()) != Comm.ENDOFPCK)
+						if(inputTelemetry != -1)
+							currentGyroRes = inputTelemetry;
+					break;
+					
+				case Telemetry.TEL_DELTA:
+					int maxdelta = 0, avgdelta = 0;
+					while((inputTelemetry = MainAction.arduino.readData()) != Comm.ENDOFPCK)
+							if(inputTelemetry != -1)
+								delta = (delta << 8) + inputTelemetry;
+						while((inputTelemetry = MainAction.arduino.readData()) != Comm.ENDOFPCK)
+						if(inputTelemetry != -1)
+							maxdelta = (maxdelta << 8) + inputTelemetry;
+					while((inputTelemetry = MainAction.arduino.readData()) != Comm.ENDOFPCK)
+						if(inputTelemetry != -1)
+							avgdelta = (avgdelta << 8) + inputTelemetry;
+					System.out.println("DELTA = " + delta + "us, MAXDELTA = " + maxdelta + "us, AVGDELTA = " + avgdelta + "us");
+					calculatePitchRoll(accel, delta);
+					break;					
+			}	
 		}
-				
-		
-		
-		
-		
-		
-		
-		
 	}
 	
+	
+	/*
+	 * Calculate Pitch and Roll angles from the Gyro and Accel data values
+	 */
+	private static void calculatePitchRoll(short[] accel, double delta){
+		
+		double pitchAccel = Math.atan2(accel[1], accel[2]);
+		double rollAccel = Math.atan2(accel[0], Math.sqrt(Math.pow(accel[1],2) + Math.pow(accel[2],2)));
+		
+		pitchAccel *= 180.0/Math.PI;
+		rollAccel *= 180.0/Math.PI;
+		
+		String p = String.format("%1.3f", pitchAccel);
+		String r = String.format("%1.3f", rollAccel);
+		
+		if (pitchAccel >= 0) p = " " + p;
+		if (rollAccel >= 0) r = " " + r;
+		
+		MainAction.window1.labelPitch.setText(p + "º");
+		MainAction.window1.labelRoll.setText(r + "º");
+	}
 }

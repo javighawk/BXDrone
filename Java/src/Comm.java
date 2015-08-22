@@ -18,21 +18,17 @@ public class Comm{
 	public final static short SPIN_U_R = 32;
 	public final static short SPIN_D_R = 48;
 	
-	//public final static short STAND_BY = 128;
-	public final static short LED_COMMAND = 0;
-	public final static short BLINK_COMMAND = 1;
-	public final static short LIGHT_POWER_COMMAND = 2;
-	public final static short BEEP_COMMAND = 3;
 	public final static short SETPID = 0x10;
 	public final static short SWITCHPID = 0x11;
 	public final static short TESTMOTORS = 0x12;
 	public final static short SETALPHA = 0x13;
 	public final static short SETOFFSETS = 0x40;
 	public final static short SET0LEVEL = 0x41;
-	public final static short SETGND = 0x42;
-	public final static short SETSTILL = 0x43;
+	public final static short STARTACCELOFFSETS = 0x42;
+	public final static short STARTGYROOFFSETS = 0x43;
 	public final static short SWITCHMOTOR = 0x50;
 	public final static short MOTOROFFSETS = 0x51;
+	public final static short STOPMOTORS = 0x52;
 	
 	public final static short MOVEMODE = 0;
 	public final static short COMMANDMODE = 8;
@@ -44,28 +40,28 @@ public class Comm{
 	public final static short SPEEDMASK = 252;
 	public final static short MODEMASK = 243;
 	
-	public final short ACK = 6;
-	public final short EOT = 4;
-	public final short LF = 10;
-	public final short TELEMETRY = 14;
-	public final short TM_PETITION = 15;
-	public final short ENDOFPCK = 27;
-	
+	public final static short I_AM = 1;
+	public final static short ACK = 6;
+	public final static short EOT = 4;
+	public final static short BEACON = 7;
+	public final static short LF = 10;
+	public final static short TELEMETRY = 14;
+	public final static short TM_PETITION = 15;
+	public final static short ENDOFPCK = 0x1B1B;
+	public final static short ESC = 0x7E;
 	public static short outputData, inputData;
 	private static short lastSent;		
 	
-	private boolean led = false, blink = false, beep = false;
-	
 	/** The streams to the port */
-    private OutputStream output = null;
-    private InputStream input = null;
+    public OutputStream output = null;
+    public InputStream input = null;
  
     SerialPort serialPort;
     private String PORT_NAME = "COM3";
     /** Milliseconds to block while waiting for port open */
     private static final int TIME_OUT = 2000;
     /** Default bits per second for COM port. */
-    private static final int DATA_RATE = 19200;
+    private static final int DATA_RATE = 115200;
     
     public void initialize(){
     	 
@@ -108,6 +104,16 @@ public class Comm{
         outputData = 0;
     }
     
+    //**************************************************************//
+    //********************* General functions **********************//
+    //**************************************************************//
+    
+    /**
+     * Set outputData parameter to 0
+     */
+    public void clearOutputData(){
+    	outputData = 0;
+    }
 
     //**************************************************************//
     //********************* Movement functions *********************//
@@ -151,87 +157,30 @@ public class Comm{
 		outputData = (short) (outputData | speed);
     }
     
-    /**
-     * Sends speed 0 to Arduino and tells the
-     * inputStream to wait for ACK
-     */
-    public void standBy(){
-	    outputData = (short) (outputData & SPEEDMASK);
-    }
+//    /**
+//     * Sends speed 0 to Arduino and tells the
+//     * inputStream to wait for ACK
+//     */
+//    public void standBy(){
+//	    outputData = (short) (outputData & SPEEDMASK);
+//    }
  
     
     //**************************************************************//
     //********************* Command functions **********************//
     //**************************************************************//
     
-    /**
-     * Sends to Arduino the White LED power
-     * 
-     * @param power The power value (between 0 and 100)
-     */
-    public void setLightPower(int power){
-    	try {
-			MainAction.OCOMMSemaphore.acquire();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-    	sendData((short) (COMMANDMODE | SHORTCUTCOMMAND | LIGHT_POWER_COMMAND));
-    	sendData((short) Math.round(((255/100) * power)));
-    	MainAction.OCOMMSemaphore.release();
+    public void setSHRTCMDMode(){
+    	outputData = (short) (outputData & MODEMASK);
+    	outputData = (short) (outputData | COMMANDMODE | SHORTCUTCOMMAND );    	
     }
     
-    /**
-     * Sends Blink command to Arduino
-     */
-    public void blinkLED(){
-    	blink = !blink;
-    	sendData((short) (COMMANDMODE | SHORTCUTCOMMAND | BLINK_COMMAND));
+    public void setStopAllMotors(){
+    	outputData = 0;
+    	setSHRTCMDMode();
+    	outputData = (short) (outputData | STOPMOTORS );
     }
-    
-    /**
-     * Return function
-     * 
-     * @return whether White LED is blinking or not
-     */
-    public boolean getblinkLED(){
-    	return blink;
-    }
-    
-    /**
-     * Sends the LED command to Arduino. It toggles the White LED on/off
-     */
-    public void sendLED(){
-    	sendData((short) (COMMANDMODE | SHORTCUTCOMMAND | LED_COMMAND));
-    	led = !led;
-    }
-    
-    /**
-     * Return function
-     * 
-     * @return White LED state
-     */
-    public boolean getLED(){
-    	return led;
-    }
-    
-    /**
-     * Sends Beep shortcut command
-     */
-    public void beep(){
-    	beep = !beep;
-    	sendData((short) (COMMANDMODE | SHORTCUTCOMMAND | BEEP_COMMAND));
-    }
-    
-    /**
-     * Return function
-     * 
-     * @return whether is beeping
-     */
-    public boolean getBeep(){
-    	return beep;
-    }
-    
+ 
     public void sendPID(int roll, int pid){
 
     	try {
@@ -347,56 +296,38 @@ public class Comm{
     	MainAction.OCOMMSemaphore.release();
     }
     
-    public void sendOffsets(int axis){
-    	
-    	byte offset = 0;
+    public void sendOffsets(int dev, int axis){
     	
     	if( axis<-1 || axis>2 ) return;
-    	
-    	if( axis == -1 ){
-    		try {
-    			MainAction.OCOMMSemaphore.acquire();
-    		} catch (InterruptedException e) {
-    			// TODO Auto-generated catch block
-    			e.printStackTrace();
-    		}
-    		sendData((short) (COMMANDMODE | SHORTCUTCOMMAND | SETOFFSETS));
-    		sendData((short) 0xFF);
-    		sendData((short) 0xFF);
-    		
-    		MainAction.OCOMMSemaphore.release();
-    		return;
-    	}
+    	int[] off = new int[3];
+    	if( dev == 0 ){
+    		off[0] = MainAction.window1.sliderOffX.getValue();
+    		off[1] = MainAction.window1.sliderOffY.getValue();
+    		off[2] = MainAction.window1.sliderOffZ.getValue();
+    	} else if( dev == 1 ){
+    		off[0] = MainAction.window1.sliderGOffX.getValue();
+    		off[1] = MainAction.window1.sliderGOffY.getValue();
+    		off[2] = MainAction.window1.sliderGOffZ.getValue();
+    	} else return;
     	
     	try {
 			MainAction.OCOMMSemaphore.acquire();
-		} catch (InterruptedException e) {
+		} catch (InterruptedException e1) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			e1.printStackTrace();
 		}
     	
     	sendData((short) (COMMANDMODE | SHORTCUTCOMMAND | SETOFFSETS));
+		sendData((short) dev);
     	
-    	switch(axis){
-    	
-    		case 0:
-    			sendData((short) 0);
-    			offset = (byte) MainAction.window1.sliderOffX.getValue();
-    			break;
-    		case 1:
-    			sendData((short) 1);
-    			offset = (byte) MainAction.window1.sliderOffY.getValue();
-    			break;
-    		case 2:
-    			sendData((short) 2);
-    			offset = (byte) MainAction.window1.sliderOffZ.getValue();
-    			break;
+    	if( axis == -1 ){
+    		sendData((short) 0xFF);
+    	} else {
+    		sendData((short) axis);
+    		sendData((short) ((off[axis] >> 8) & 0xFF));
+    		sendData((short) (off[axis] & 0xFF));
     	}
-    	
-    	sendData((short) offset);
-    	
     	MainAction.OCOMMSemaphore.release();
-
     }
     
     public void send0Level(){
@@ -412,7 +343,7 @@ public class Comm{
     	MainAction.OCOMMSemaphore.release();
     }
     
-    public void sendGND(){
+    public void startAccelOffsets(){
     	try {
 			MainAction.OCOMMSemaphore.acquire();
 		} catch (InterruptedException e) {
@@ -420,12 +351,12 @@ public class Comm{
 			e.printStackTrace();
 		}
     	
-    	sendData((short) (COMMANDMODE | SHORTCUTCOMMAND | SETGND));
+    	sendData((short) (COMMANDMODE | SHORTCUTCOMMAND | STARTACCELOFFSETS));
     	
     	MainAction.OCOMMSemaphore.release();
     }
     
-    public void sendStillLevel(){
+    public void startGyroOffsets(){
     	try {
 			MainAction.OCOMMSemaphore.acquire();
 		} catch (InterruptedException e) {
@@ -433,7 +364,7 @@ public class Comm{
 			e.printStackTrace();
 		}
     	
-    	sendData((short) (COMMANDMODE | SHORTCUTCOMMAND | SETSTILL));
+    	sendData((short) (COMMANDMODE | SHORTCUTCOMMAND | STARTGYROOFFSETS));
     	
     	try {
 			Thread.sleep(100);
@@ -559,9 +490,25 @@ public class Comm{
     	try {
 			inputData = (short) input.read();
 		} catch (IOException e) {
-			MainAction.showError("Error sending data");
+			MainAction.showError("Error reading data");
             System.exit(1);
 		}
+    	
+    	/* If received byte is a flag, we have to discard it
+    	 * and take the following byte */
+    	if( inputData == ESC )
+			try {
+				while( (inputData = (short) input.read()) == -1);
+			} catch (IOException e) {
+				MainAction.showError("Error reading data");
+	            System.exit(1);
+			}
+    	
+    	/* Otherwise if we receive a ENDOFPCK byte, it's not data
+    	 * but a real END-OF-PACKAGE byte */
+		else if( inputData == (ENDOFPCK & 0xFF))
+    		return ENDOFPCK;
+    	
     	return inputData;
     }    
     

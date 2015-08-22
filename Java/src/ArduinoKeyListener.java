@@ -29,13 +29,12 @@ public class ArduinoKeyListener implements KeyListener{
 	  			MainAction.arduino.setSpeed((short) MainAction.window1.slider.getValue());
 	  			break;	
 	  		case KeyEvent.VK_SPACE:
-	  			MainAction.arduino.setSpin();
-	  			MainAction.arduino.setDirection(Comm.DIR_UP);
+	  			MainAction.arduino.setStopAllMotors();
 	  			break;	  	
-//	  		case KeyEvent.VK_BACK_SPACE:
-//	  			MainAction.arduino.setSpin();
-//	  			MainAction.arduino.setDirection(Comm.DIR_DOWN);
-//	  			break;
+		   case KeyEvent.VK_BACK_SPACE:
+	  			MainAction.arduino.setSpin();
+	  			MainAction.arduino.setDirection(Comm.DIR_DOWN);
+	  			break;
 	  		default:
 	  			return;
 	  	  }
@@ -49,27 +48,27 @@ public class ArduinoKeyListener implements KeyListener{
       switch(e.getKeyCode()){
     	
     	case KeyEvent.VK_A:
-    		MainAction.arduino.standBy();
+    		MainAction.arduino.clearOutputData();
   			break;
   		case KeyEvent.VK_D:
-  			MainAction.arduino.standBy();
+  			MainAction.arduino.clearOutputData();
   			break;
   		case KeyEvent.VK_W: 
-  			MainAction.arduino.standBy();
+  			MainAction.arduino.clearOutputData();
   			break;
   		case KeyEvent.VK_S:
-  			MainAction.arduino.standBy();
+  			MainAction.arduino.clearOutputData();
   			break; 		
   		case KeyEvent.VK_SPACE:
-  			MainAction.arduino.standBy();
-  			break; 	
-//  		case KeyEvent.VK_BACK_SPACE:
-//  			MainAction.arduino.standBy();
-//  			break;
+  			MainAction.arduino.clearOutputData();
+  			break;
+  		case KeyEvent.VK_BACK_SPACE:
+  			MainAction.arduino.clearOutputData();
+  			break;
   		default:
   			return;
     	}
-
+      
   		MainAction.outputS.threadContinue();
 
     }

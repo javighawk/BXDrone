@@ -38,14 +38,13 @@ public class InterfazGrafica extends JFrame{
     
     JTextArea text, textArea;
     JLabel label, lblTextModeOn;
-    JSlider slider, sliderLight;
+    JSlider slider;
     public JTextField textField;
     JButton btnSendText, button, btnNewButton;
     private JTextField txtCom;
     
     public ConnectThread connectThread = new ConnectThread();
     private JTextField textField_1;
-    private JLabel labelPower;
     private JLabel labelSpeed;
     
     public JLabel lblM1Pow, lblM2Pow, lblM3Pow, lblM4Pow;
@@ -58,6 +57,7 @@ public class InterfazGrafica extends JFrame{
     public JLabel lblPitch;
     public JLabel lblRoll;
     public JLabel labelX, labelY, labelZ; 
+    public JLabel labelGyroX, labelGyroY, labelGyroZ;
     
     public JLabel labelDiffM1, labelDiffM2,
     			  labelDiffM3, labelDiffM4;
@@ -78,13 +78,12 @@ public class InterfazGrafica extends JFrame{
     public JLabel lblAlphaAccel;
     public JLabel lblAlphaGyro;
     public JLabel lblAlphaDeg;
-    public JLabel lblGyroXMed, lblGyroZMed;
     
     public JSlider sliderOffX, sliderOffY, sliderOffZ;
+    public JSlider sliderGOffX, sliderGOffY, sliderGOffZ;
     public JLabel lblOffX, lblOffY, lblOffZ, lbl0Pitch, lbl0Roll;
-    
-    public JLabel lblDeltaPitch, lblDeltaRoll;
-    public  JButton btnDefaultOffsets, btnSetLevel, btnSetStillLevel;
+    public JLabel lblGOffX, lblGOffY, lblGOffZ;
+    public  JButton btnDefaultOffsets, btnSetLevel, btnSetStillLevel, defaultGOffsets;
     public JButton btnSwitchM1, btnSwitchM2, btnSwitchM3, btnSwitchM4;
     private JPanel panel_4;
     private JPanel panel_5;
@@ -94,6 +93,8 @@ public class InterfazGrafica extends JFrame{
     private JPanel panel_10;
     private JPanel panel_11;
     private JPanel panel_13;
+    private JLabel label_16;
+    
     /**
      * Constructor. Abre una nueva ventana en la que 
      * inserta todos los componentes y un tablero.
@@ -105,7 +106,7 @@ public class InterfazGrafica extends JFrame{
         setResizable(false);
         getContentPane().addKeyListener(new ArduinoKeyListener());
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setPreferredSize(new Dimension(1070, 600));        
+        setPreferredSize(new Dimension(1230, 600));        
         pack();
         getContentPane().setLayout(null);
         
@@ -132,6 +133,7 @@ public class InterfazGrafica extends JFrame{
         getContentPane().add(lblSpeed);
         
         textField = new JTextField();
+        textField.setEnabled(false);
         textField.addFocusListener(new FocusListener() {
         	public void focusGained(FocusEvent e) {
         		MainAction.window1.lblTextModeOn.setVisible(true);                
@@ -164,6 +166,7 @@ public class InterfazGrafica extends JFrame{
         getContentPane().add(lblTextMode);
         
         btnSendText = new JButton("Send Text");
+        btnSendText.setEnabled(false);
         btnSendText.addKeyListener(new ArduinoKeyListener());
         btnSendText.setBounds(20, 263, 100, 23);
 /*        btnSendText.addActionListener(new ActionListener(){
@@ -224,12 +227,13 @@ public class InterfazGrafica extends JFrame{
         getContentPane().add(label_1);
         
         txtCom = new JTextField();
-        txtCom.setText("COM5");
+        txtCom.setText("COM3");
         txtCom.setColumns(10);
         txtCom.setBounds(352, 96, 86, 20);
         getContentPane().add(txtCom);
         
         textField_1 = new JTextField();
+        textField_1.setEnabled(false);
         textField_1.setFont(new Font("Courier New", Font.PLAIN, 12));
         textField_1.setBounds(255, 266, 199, 20);
         textField_1.addKeyListener(new KeyAdapter(){
@@ -255,6 +259,7 @@ public class InterfazGrafica extends JFrame{
         textField_1.setColumns(10);
         
         btnNewButton = new JButton("Command Mode");
+        btnNewButton.setEnabled(false);
         btnNewButton.setBounds(327, 231, 127, 23);
 /*        btnNewButton.addActionListener(new ActionListener(){
         	public void actionPerformed(ActionEvent e){
@@ -270,28 +275,6 @@ public class InterfazGrafica extends JFrame{
         }); */
         getContentPane().add(btnNewButton);
         
-        sliderLight = new JSlider();
-        sliderLight.setValue(100);
-        sliderLight.setBounds(20, 147, 200, 37);
-//        sliderLight.addChangeListener(new ChangeListener() {
-//        	public void stateChanged(ChangeEvent arg0) {
-//        		MainAction.arduino.setLightPower(sliderLight.getValue());
-//        		labelPower.setText(Integer.toString(sliderLight.getValue()));
-//        	}
-//        });
-        sliderLight.addKeyListener(new ArduinoKeyListener());
-        getContentPane().add(sliderLight);
-        
-        JLabel lblLightPower = new JLabel("LIGHT POWER");
-        lblLightPower.setBounds(20, 135, 100, 14);
-        lblLightPower.addKeyListener(new ArduinoKeyListener());
-        getContentPane().add(lblLightPower);
-        
-        labelPower = new JLabel(Integer.toString(sliderLight.getValue()));
-        labelPower.setBounds(225, 151, 40, 16);
-        labelPower.addKeyListener(new ArduinoKeyListener());
-        getContentPane().add(labelPower);
-        
         labelSpeed = new JLabel(Integer.toString(slider.getValue()));
         labelSpeed.setBounds(225, 86, 40, 16);
         labelSpeed.addKeyListener(new ArduinoKeyListener());
@@ -299,7 +282,7 @@ public class InterfazGrafica extends JFrame{
         
         JPanel panel_1 = new JPanel();
         panel_1.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "TM/TC", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-        panel_1.setBounds(482, 11, 570, 548);
+        panel_1.setBounds(482, 11, 733, 548);
         getContentPane().add(panel_1);
         panel_1.setLayout(null);
         
@@ -422,6 +405,7 @@ public class InterfazGrafica extends JFrame{
         
         sliderAlphaDeg = new JSlider();
         sliderAlphaDeg.setBounds(10, 71, 134, 23);
+        sliderAlphaDeg.addKeyListener(new ArduinoKeyListener());
         panel_10.add(sliderAlphaDeg);
         
         lblAlphaDeg = new JLabel("0");
@@ -499,7 +483,7 @@ public class InterfazGrafica extends JFrame{
         labelZ.setFont(new Font("Courier New", Font.PLAIN, 14));
         
         JPanel panel_3 = new JPanel();
-        panel_3.setBorder(new TitledBorder(null, "Roll PID", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+        panel_3.setBorder(new TitledBorder(null, "Gyro PID", TitledBorder.LEADING, TitledBorder.TOP, null, null));
         panel_3.setBounds(10, 444, 212, 93);
         panel_1.add(panel_3);
         panel_3.setLayout(null);
@@ -510,7 +494,6 @@ public class InterfazGrafica extends JFrame{
         lblP1.setFont(new Font("Courier New", Font.PLAIN, 14));
         
         sliderP1 = new JSlider();
-        sliderP1.setMaximum(255);
         sliderP1.setBounds(28, 19, 123, 23);
         panel_3.add(sliderP1);
         sliderP1.setValue(0);
@@ -561,7 +544,6 @@ public class InterfazGrafica extends JFrame{
         lblI1.setFont(new Font("Courier New", Font.PLAIN, 14));
         
         sliderI1 = new JSlider();
-        sliderI1.setMaximum(255);
         sliderI1.setBounds(28, 42, 123, 23);
         panel_3.add(sliderI1);
         sliderI1.setValue(0);
@@ -612,7 +594,6 @@ public class InterfazGrafica extends JFrame{
         lblD1.setFont(new Font("Courier New", Font.PLAIN, 14));
         
         sliderD1 = new JSlider();
-        sliderD1.setMaximum(255);
         sliderD1.setBounds(28, 64, 123, 23);
         panel_3.add(sliderD1);
         sliderD1.setValue(0);
@@ -658,7 +639,7 @@ public class InterfazGrafica extends JFrame{
         lblD1v.setFont(new Font("Courier New", Font.PLAIN, 14));
         
         JPanel panel_2 = new JPanel();
-        panel_2.setBorder(new TitledBorder(null, "Pitch PID", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+        panel_2.setBorder(new TitledBorder(null, "Angles PID", TitledBorder.LEADING, TitledBorder.TOP, null, null));
         panel_2.setBounds(10, 351, 212, 93);
         panel_1.add(panel_2);
         panel_2.setLayout(null);
@@ -674,7 +655,6 @@ public class InterfazGrafica extends JFrame{
         lblP0v.setFont(new Font("Courier New", Font.PLAIN, 14));
         
         sliderP0 = new JSlider();
-        sliderP0.setMaximum(255);
         sliderP0.setBounds(28, 19, 123, 23);
         panel_2.add(sliderP0);
         sliderP0.setValue(0);
@@ -716,7 +696,6 @@ public class InterfazGrafica extends JFrame{
         lblI0v.setFont(new Font("Courier New", Font.PLAIN, 14));
         
         sliderI0 = new JSlider();
-        sliderI0.setMaximum(255);
         sliderI0.setBounds(28, 42, 123, 23);
         panel_2.add(sliderI0);
         sliderI0.setValue(0);
@@ -767,7 +746,6 @@ public class InterfazGrafica extends JFrame{
         lblD0.setFont(new Font("Courier New", Font.PLAIN, 14));
         
         sliderD0 = new JSlider();
-        sliderD0.setMaximum(255);
         sliderD0.setBounds(28, 64, 123, 23);
         panel_2.add(sliderD0);
         sliderD0.setValue(0);
@@ -825,6 +803,7 @@ public class InterfazGrafica extends JFrame{
         
         sliderAlphaAccel = new JSlider();
         sliderAlphaAccel.setBounds(10, 38, 104, 23);
+        sliderAlphaAccel.addKeyListener(new ArduinoKeyListener());
         panel_5.add(sliderAlphaAccel);
         
         lblAlphaAccel = new JLabel("0");
@@ -837,16 +816,16 @@ public class InterfazGrafica extends JFrame{
         panel_5.add(sliderOffX);
         sliderOffX.setValue(0);
         sliderOffX.setMinorTickSpacing(1);
-        sliderOffX.setMaximum(75);
-        sliderOffX.setMinimum(-75);
+        sliderOffX.setMaximum(200);
+        sliderOffX.setMinimum(-200);
         sliderOffX.addKeyListener(new ArduinoKeyListener());
         
         sliderOffY = new JSlider();
         sliderOffY.setBounds(26, 105, 104, 23);
         panel_5.add(sliderOffY);
         sliderOffY.setMinorTickSpacing(1);
-        sliderOffY.setMaximum(75);
-        sliderOffY.setMinimum(-75);
+        sliderOffY.setMaximum(200);
+        sliderOffY.setMinimum(-200);
         sliderOffY.setValue(0);
         sliderOffY.addKeyListener(new ArduinoKeyListener());
         
@@ -855,8 +834,8 @@ public class InterfazGrafica extends JFrame{
         panel_5.add(sliderOffZ);
         sliderOffZ.setValue(0);
         sliderOffZ.setMinorTickSpacing(1);
-        sliderOffZ.setMinimum(-75);
-        sliderOffZ.setMaximum(75);
+        sliderOffZ.setMinimum(-200);
+        sliderOffZ.setMaximum(200);
         sliderOffZ.addKeyListener(new ArduinoKeyListener());
         
         JLabel label_2 = new JLabel("X:");
@@ -898,18 +877,19 @@ public class InterfazGrafica extends JFrame{
         btnDefaultOffsets.setBounds(16, 157, 129, 23);
         panel_5.add(btnDefaultOffsets);
         
-        btnSetGround = new JButton("Set Ground Level");
+        btnSetGround = new JButton("Auto Offsets");
         btnSetGround.setFont(new Font("Tahoma", Font.PLAIN, 11));
         btnSetGround.setBounds(16, 186, 129, 23);
         panel_5.add(btnSetGround);
+        btnSetGround.addKeyListener(new ArduinoKeyListener());
         btnSetGround.addActionListener(new ActionListener(){
         	public void actionPerformed(ActionEvent arg0){
-        		MainAction.arduino.sendGND();
+        		MainAction.arduino.startAccelOffsets();
         	}
         });
         btnDefaultOffsets.addActionListener(new ActionListener(){
         	public void actionPerformed(ActionEvent arg0){
-        		MainAction.arduino.sendOffsets(-1);
+        		MainAction.arduino.sendOffsets(0, -1);
         	}
         });
         btnDefaultOffsets.addKeyListener(new ArduinoKeyListener());
@@ -941,7 +921,7 @@ public class InterfazGrafica extends JFrame{
 
 			@Override
 			public void mouseReleased(MouseEvent e) {
-				MainAction.arduino.sendOffsets(2);
+				MainAction.arduino.sendOffsets(0,2);
 				
 			}
         	
@@ -974,7 +954,7 @@ public class InterfazGrafica extends JFrame{
 
 			@Override
 			public void mouseReleased(MouseEvent e) {
-				MainAction.arduino.sendOffsets(1);
+				MainAction.arduino.sendOffsets(0,1);
 				
 			}
         	
@@ -1007,7 +987,7 @@ public class InterfazGrafica extends JFrame{
 
 			@Override
 			public void mouseReleased(MouseEvent e) {
-				MainAction.arduino.sendOffsets(0);
+				MainAction.arduino.sendOffsets(0,0);
 				
 			}
         	
@@ -1049,29 +1029,39 @@ public class InterfazGrafica extends JFrame{
         
         panel_4 = new JPanel();
         panel_4.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "Gyroscope Readings", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-        panel_4.setBounds(402, 19, 158, 59);
+        panel_4.setBounds(400, 19, 158, 74);
         panel_1.add(panel_4);
         panel_4.setLayout(null);
         
-        JLabel label_deltaPitch = new JLabel("\u0394Pitch:");
-        label_deltaPitch.setBounds(10, 21, 104, 14);
-        panel_4.add(label_deltaPitch);
-        label_deltaPitch.setFont(new Font("Courier New", Font.PLAIN, 14));
+        JLabel label_5 = new JLabel("X:");
+        label_5.setFont(new Font("Courier New", Font.PLAIN, 14));
+        label_5.setBounds(10, 20, 104, 14);
+        panel_4.add(label_5);
         
-        lblDeltaPitch = new JLabel("0");
-        lblDeltaPitch.setBounds(73, 21, 86, 14);
-        panel_4.add(lblDeltaPitch);
-        lblDeltaPitch.setFont(new Font("Courier New", Font.PLAIN, 14));
+        labelGyroX = new JLabel("0");
+        labelGyroX.setFont(new Font("Courier New", Font.PLAIN, 14));
+        labelGyroX.setBounds(61, 20, 87, 14);
+        panel_4.add(labelGyroX);
         
-        JLabel label_deltaRoll = new JLabel("\u0394Roll:");
-        label_deltaRoll.setBounds(10, 35, 104, 14);
-        panel_4.add(label_deltaRoll);
-        label_deltaRoll.setFont(new Font("Courier New", Font.PLAIN, 14));
+        JLabel label_9 = new JLabel("Y:");
+        label_9.setFont(new Font("Courier New", Font.PLAIN, 14));
+        label_9.setBounds(10, 34, 104, 14);
+        panel_4.add(label_9);
         
-        lblDeltaRoll = new JLabel("0");
-        lblDeltaRoll.setBounds(73, 35, 86, 14);
-        panel_4.add(lblDeltaRoll);
-        lblDeltaRoll.setFont(new Font("Courier New", Font.PLAIN, 14));
+        labelGyroY = new JLabel("0");
+        labelGyroY.setFont(new Font("Courier New", Font.PLAIN, 14));
+        labelGyroY.setBounds(61, 34, 87, 14);
+        panel_4.add(labelGyroY);
+        
+        JLabel label_11 = new JLabel("Z:");
+        label_11.setFont(new Font("Courier New", Font.PLAIN, 14));
+        label_11.setBounds(10, 49, 104, 14);
+        panel_4.add(label_11);
+        
+        labelGyroZ = new JLabel("0");
+        labelGyroZ.setFont(new Font("Courier New", Font.PLAIN, 14));
+        labelGyroZ.setBounds(61, 49, 87, 14);
+        panel_4.add(labelGyroZ);
         
         panel_11 = new JPanel();
         panel_11.setBorder(new TitledBorder(null, "PID Options", TitledBorder.LEADING, TitledBorder.TOP, null, null));
@@ -1142,7 +1132,7 @@ public class InterfazGrafica extends JFrame{
         JPanel panel_7 = new JPanel();
         panel_7.setLayout(null);
         panel_7.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "Gyro Options", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-        panel_7.setBounds(402, 78, 158, 149);
+        panel_7.setBounds(400, 94, 158, 220);
         panel_1.add(panel_7);
         
         JLabel label_6 = new JLabel("LPF - Alpha:");
@@ -1193,36 +1183,215 @@ public class InterfazGrafica extends JFrame{
         lblAlphaGyro.setBounds(116, 42, 36, 14);
         panel_7.add(lblAlphaGyro);
         
-        btnSetStillLevel = new JButton("Set Still Level");
+        btnSetStillLevel = new JButton("Auto Offsets");
         btnSetStillLevel.addKeyListener(new ArduinoKeyListener());
         btnSetStillLevel.addActionListener(new ActionListener() {
         	public void actionPerformed(ActionEvent arg0) {
-        		MainAction.arduino.sendStillLevel();
+        		MainAction.arduino.startGyroOffsets();
         	}
         });
         btnSetStillLevel.setFont(new Font("Tahoma", Font.PLAIN, 11));
-        btnSetStillLevel.setBounds(10, 115, 129, 23);
+        btnSetStillLevel.setBounds(10, 186, 129, 23);
         panel_7.add(btnSetStillLevel);
         
-        JLabel lblXMed = new JLabel("X Med:");
-        lblXMed.setFont(new Font("Courier New", Font.PLAIN, 14));
-        lblXMed.setBounds(10, 72, 104, 14);
-        panel_7.add(lblXMed);
+        JLabel label_8 = new JLabel("X:");
+        label_8.setFont(new Font("Courier New", Font.PLAIN, 14));
+        label_8.setBounds(10, 87, 30, 14);
+        panel_7.add(label_8);
         
-        lblGyroXMed = new JLabel("0");
-        lblGyroXMed.setFont(new Font("Courier New", Font.PLAIN, 14));
-        lblGyroXMed.setBounds(73, 72, 86, 14);
-        panel_7.add(lblGyroXMed);
+        sliderGOffX = new JSlider();
+        sliderGOffX.setValue(0);
+        sliderGOffX.setMinorTickSpacing(1);
+        sliderGOffX.setMinimum(-200);
+        sliderGOffX.setMaximum(200);
+        sliderGOffX.setBounds(26, 83, 85, 23);
+        sliderGOffX.addKeyListener(new ArduinoKeyListener());
+        sliderGOffX.addMouseListener(new MouseListener(){
+
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mousePressed(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				MainAction.arduino.sendOffsets(1, 0);
+				
+			}
+        	
+        });
+        panel_7.add(sliderGOffX);
         
-        JLabel lblZMed = new JLabel("Z Med:");
-        lblZMed.setFont(new Font("Courier New", Font.PLAIN, 14));
-        lblZMed.setBounds(10, 86, 104, 14);
-        panel_7.add(lblZMed);
+        lblGOffX = new JLabel("0");
+        lblGOffX.setFont(new Font("Courier New", Font.PLAIN, 14));
+        lblGOffX.setBounds(112, 87, 40, 14);
+        panel_7.add(lblGOffX);
         
-        lblGyroZMed = new JLabel("0");
-        lblGyroZMed.setFont(new Font("Courier New", Font.PLAIN, 14));
-        lblGyroZMed.setBounds(73, 86, 86, 14);
-        panel_7.add(lblGyroZMed);
+        lblGOffY = new JLabel("0");
+        lblGOffY.setFont(new Font("Courier New", Font.PLAIN, 14));
+        lblGOffY.setBounds(112, 110, 40, 14);
+        panel_7.add(lblGOffY);
+        
+        sliderGOffZ = new JSlider();
+        sliderGOffZ.setValue(0);
+        sliderGOffZ.setMinorTickSpacing(1);
+        sliderGOffZ.setMinimum(-200);
+        sliderGOffZ.setMaximum(200);
+        sliderGOffZ.setBounds(26, 129, 85, 23);
+        sliderGOffZ.addKeyListener(new ArduinoKeyListener());
+        sliderGOffZ.addMouseListener(new MouseListener(){
+
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mousePressed(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				MainAction.arduino.sendOffsets(1, 2);
+				
+			}
+        	
+        });
+        panel_7.add(sliderGOffZ);
+        
+        lblGOffZ = new JLabel("0");
+        lblGOffZ.setFont(new Font("Courier New", Font.PLAIN, 14));
+        lblGOffZ.setBounds(112, 133, 40, 14);
+        panel_7.add(lblGOffZ);
+        
+        sliderGOffY = new JSlider();
+        sliderGOffY.setValue(0);
+        sliderGOffY.setMinorTickSpacing(1);
+        sliderGOffY.setMinimum(-200);
+        sliderGOffY.setMaximum(200);
+        sliderGOffY.setBounds(26, 106, 85, 23);
+        sliderGOffY.addKeyListener(new ArduinoKeyListener());
+        sliderGOffY.addMouseListener(new MouseListener(){
+
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mousePressed(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				MainAction.arduino.sendOffsets(1, 1);
+				
+			}
+        	
+        });
+        panel_7.add(sliderGOffY);
+        
+        JLabel label_14 = new JLabel("Y:");
+        label_14.setFont(new Font("Courier New", Font.PLAIN, 14));
+        label_14.setBounds(10, 110, 30, 14);
+        panel_7.add(label_14);
+        
+        JLabel label_15 = new JLabel("Z:");
+        label_15.setFont(new Font("Courier New", Font.PLAIN, 14));
+        label_15.setBounds(10, 133, 30, 14);
+        panel_7.add(label_15);
+        
+        label_16 = new JLabel("Offsets:");
+        label_16.setFont(new Font("Courier New", Font.PLAIN, 14));
+        label_16.setBounds(8, 67, 158, 14);
+        panel_7.add(label_16);
+        
+        defaultGOffsets = new JButton("Default Offsets");
+        defaultGOffsets.setBounds(10, 157, 129, 23);
+        defaultGOffsets.addKeyListener(new ArduinoKeyListener());
+        defaultGOffsets.addMouseListener(new MouseListener(){
+
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mousePressed(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				MainAction.arduino.sendOffsets(1, -1);
+				
+			}
+        	
+        });
+        panel_7.add(defaultGOffsets);
         
         panel_6 = new JPanel();
         panel_6.setBounds(10, 266, 212, 83);
@@ -1232,24 +1401,28 @@ public class InterfazGrafica extends JFrame{
         
         btnTestM4 = new JButton("M4");
         btnTestM4.setBounds(10, 36, 57, 23);
+        btnTestM4.addKeyListener(new ArduinoKeyListener());
         panel_6.add(btnTestM4);
         
         btnTestM1 = new JButton("M1");
         btnTestM1.setBounds(77, 21, 57, 23);
+        btnTestM1.addKeyListener(new ArduinoKeyListener());
         panel_6.add(btnTestM1);
         
         btnTestM3 = new JButton("M3");
         btnTestM3.setBounds(77, 49, 57, 23);
+        btnTestM3.addKeyListener(new ArduinoKeyListener());
         panel_6.add(btnTestM3);
         
         btnTestM2 = new JButton("M2");
         btnTestM2.setBounds(145, 36, 57, 23);
+        btnTestM2.addKeyListener(new ArduinoKeyListener());
         panel_6.add(btnTestM2);
         
         JPanel panel_12 = new JPanel();
         panel_12.setLayout(null);
         panel_12.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "Motors Power", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-        panel_12.setBounds(400, 227, 160, 310);
+        panel_12.setBounds(568, 19, 160, 310);
         panel_1.add(panel_12);
         
         btnSwitchM4 = new JButton("M4");
@@ -1337,6 +1510,7 @@ public class InterfazGrafica extends JFrame{
         sldOffM1.setMinorTickSpacing(1);
         sldOffM1.setMinimum(-100);
         sldOffM1.setBounds(32, 210, 75, 23);
+        sldOffM1.addKeyListener(new ArduinoKeyListener());
         sldOffM1.addMouseListener(new MouseListener(){
         	public void mouseReleased(MouseEvent e){
         		MainAction.arduino.sendMotorOffset(1);
@@ -1373,6 +1547,7 @@ public class InterfazGrafica extends JFrame{
         sldOffM2.setMinorTickSpacing(1);
         sldOffM2.setMinimum(-100);
         sldOffM2.setBounds(32, 232, 75, 23);
+        sldOffM2.addKeyListener(new ArduinoKeyListener());
         sldOffM2.addMouseListener(new MouseListener(){
         	public void mouseReleased(MouseEvent e){
         		MainAction.arduino.sendMotorOffset(2);
@@ -1409,6 +1584,7 @@ public class InterfazGrafica extends JFrame{
         sldOffM3.setMinorTickSpacing(1);
         sldOffM3.setMinimum(-100);
         sldOffM3.setBounds(32, 254, 75, 23);
+        sldOffM3.addKeyListener(new ArduinoKeyListener());
         sldOffM3.addMouseListener(new MouseListener(){
         	public void mouseReleased(MouseEvent e){
         		MainAction.arduino.sendMotorOffset(3);
@@ -1445,6 +1621,7 @@ public class InterfazGrafica extends JFrame{
         sldOffM4.setMinorTickSpacing(1);
         sldOffM4.setMinimum(-100);
         sldOffM4.setBounds(32, 276, 75, 23);
+        sldOffM4.addKeyListener(new ArduinoKeyListener());
         sldOffM4.addMouseListener(new MouseListener(){
         	public void mouseReleased(MouseEvent e){
         		MainAction.arduino.sendMotorOffset(4);
@@ -1543,10 +1720,6 @@ public class InterfazGrafica extends JFrame{
     
     public void setInitial(){
     	slider.setEnabled(false);
-    	sliderLight.setEnabled(false);
-    	textField.setEnabled(false);
-    	btnSendText.setEnabled(false);
-    	btnNewButton.setEnabled(false);
     	
     	btnTestM1.setEnabled(false);
     	btnTestM2.setEnabled(false);
@@ -1558,17 +1731,21 @@ public class InterfazGrafica extends JFrame{
     	btnSwitchM4.setEnabled(false);
     	
     	txtCom.setEnabled(true);
-    	button.setEnabled(true);   
+    	button.setEnabled(true);
     	
     	sliderOffX.setEnabled(false);
     	sliderOffY.setEnabled(false);
     	sliderOffZ.setEnabled(false);
+    	sliderGOffX.setEnabled(false);
+    	sliderGOffY.setEnabled(false);
+    	sliderGOffZ.setEnabled(false);
     	sliderAlphaAccel.setEnabled(false);
     	sliderAlphaGyro.setEnabled(false);
     	btnDefaultOffsets.setEnabled(false);
     	btnSetLevel.setEnabled(false);
     	btnSetGround.setEnabled(false);
     	btnSetStillLevel.setEnabled(false);
+    	defaultGOffsets.setEnabled(false);
     	sliderAlphaDeg.setEnabled(false);
 		sldOffM1.setEnabled(false);
 		sldOffM2.setEnabled(false);
@@ -1588,10 +1765,12 @@ public class InterfazGrafica extends JFrame{
     	labelDiffM2.setText("N/A");
     	labelDiffM3.setText("N/A");
     	labelDiffM4.setText("N/A");
-    	lblDeltaPitch.setText("N/A");
-    	lblDeltaRoll.setText("N/A");
-    	lblGyroXMed.setText("N/A");
-    	lblGyroZMed.setText("N/A");
+    	labelGyroX.setText("N/A");
+    	labelGyroY.setText("N/A");
+    	labelGyroZ.setText("N/A");
+    	lblGOffX.setText("N/A");
+    	lblGOffY.setText("N/A");
+    	lblGOffZ.setText("N/A");
     	
     	lblP0v.setText("N/A");
     	lblI0v.setText("N/A");
@@ -1601,21 +1780,21 @@ public class InterfazGrafica extends JFrame{
     	lblD1v.setText("N/A");
     	
     	lblPID.setText("N/A");
+    	lblPID.setForeground(Color.BLACK);
     	
     	lblOffM1.setText("N/A");
     	lblOffM2.setText("N/A");
     	lblOffM3.setText("N/A");
     	lblOffM4.setText("N/A");
     	
+    	button.requestFocus();
+    	
     	disablePIDCommand();
 	}
     
     public void setConnected(){
     	slider.setEnabled(true);
-    	sliderLight.setEnabled(true);
-    	textField.setEnabled(true);
-    	btnSendText.setEnabled(true);
-    	btnNewButton.setEnabled(true);
+    	txtCom.setEnabled(false);
     	btnSetGround.setEnabled(true);
     	sliderAlphaDeg.setEnabled(true);
     	
@@ -1636,10 +1815,24 @@ public class InterfazGrafica extends JFrame{
     	
     	enablePIDCommand();
     	
-    	txtCom.setEnabled(false);
     	button.setEnabled(false); 
     	slider.requestFocus();    
     	clearTelemetry();
+    	
+    	sliderAlphaGyro.setEnabled(true);
+    	sliderAlphaAccel.setEnabled(true);
+    	sliderOffX.setEnabled(true);
+    	sliderOffY.setEnabled(true);
+    	sliderOffZ.setEnabled(true);
+    	sliderGOffX.setEnabled(true);
+    	sliderGOffY.setEnabled(true);
+    	sliderGOffZ.setEnabled(true);
+    	
+    	btnDefaultOffsets.setEnabled(true);
+    	btnSetStillLevel.setEnabled(true);
+    	btnSetLevel.setEnabled(true);
+    	defaultGOffsets.setEnabled(true);
+    	
     }
     
     public void print(String s){
@@ -1667,8 +1860,9 @@ public class InterfazGrafica extends JFrame{
     	labelDiffM2.setText("0");
     	labelDiffM3.setText("0");
     	labelDiffM4.setText("0");
-    	lblDeltaPitch.setText("0");
-    	lblDeltaRoll.setText("0");
+    	labelGyroX.setText("0");
+    	labelGyroY.setText("0");
+    	labelGyroZ.setText("0");
     	
     	lblP0v.setText("0");
     	lblI0v.setText("0");

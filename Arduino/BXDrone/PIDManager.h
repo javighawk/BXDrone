@@ -7,8 +7,7 @@
 /*****************************************/
 
 #include "BXD.h"
-#include "Accel.h"
-#include "Gyro.h"
+#include "IMUManager.h"
 #include "BXMoveMode.h"
 
 
@@ -16,11 +15,12 @@
 /**************** DEFINES ****************/
 /*****************************************/
 
-#define PR_PERIOD_MS        10
-
-#define DEFAULT_PVALUE     50
-#define DEFAULT_IVALUE      2
-#define DEFAULT_DVALUE      3
+#define DEFAULT_PVALUE_ANGLES     10
+#define DEFAULT_IVALUE_ANGLES      0
+#define DEFAULT_DVALUE_ANGLES      0
+#define DEFAULT_PVALUE_GYRO       50
+#define DEFAULT_IVALUE_GYRO        0
+#define DEFAULT_DVALUE_GYRO        0
 
 
 /*****************************************/
@@ -29,18 +29,18 @@
 
 void PIDInit();
 void PIDCompute();
-void runPitchRoll();
 double getPitch();
 double getRoll();
 double getDiffMotor(int motor);
-int getPIDValues( int roll, int pid );
-void setPIDValues( int roll, int pid, int value );
+double getPIDValues( int roll, int pid );
+void setPIDValues( int roll, int pid, double value );
 void setPIDEnabled( boolean enabled );
 boolean isPIDEnabled();
-void PIDSetCurrentOLevels();
-double PIDGetPitchOLevel();
-double PIDGetRollOLevel();
-double getDegreesLPFAlpha();
-void setDegreesLPFAlpha( double k );
+void PID_setDesiredAngles(int pitch, int roll);
+int PID_getDesiredPitch();
+int PID_getDesiredRoll();
+double PID_getSetPointAX();
+double PID_getSetPointAY();
+double PID_getSetPointAZ();
 
 #endif

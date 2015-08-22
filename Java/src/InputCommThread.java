@@ -1,12 +1,11 @@
 public class InputCommThread extends Thread {
 	
-	private static boolean wait = false;
 	private boolean progress;
 	private boolean acceptTM = false;
 	
 	private TimeOutThread timeOut = new TimeOutThread();
 	
-	private final int LF_TIME_OUT = 3000;
+	private final int LF_TIME_OUT = 3500;
 	
 	public void run(){
 		timeOut.start();
@@ -20,14 +19,13 @@ public class InputCommThread extends Thread {
 					
 					timeOut.refreshTime();
 					
-					if(inputData == (MainAction.arduino.EOT + (MainAction.startComm.getNOC_ID() << 4))){
+					if(inputData == (Comm.EOT + (MainAction.startComm.getNOC_ID() << 4))){
 						MainAction.outputS.pause();
 						setStandBy(true);
-						wait = false;
 						continue;
 					}
 				
-					if(inputData == (MainAction.arduino.TM_PETITION + (MainAction.startComm.getNOC_ID() << 4))){
+					if(inputData == (Comm.TM_PETITION + (MainAction.startComm.getNOC_ID() << 4))){
 						
 						try {
 							MainAction.OCOMMSemaphore.acquire();
@@ -42,7 +40,7 @@ public class InputCommThread extends Thread {
 						continue;
 					}
 					
-					if(inputData == (MainAction.arduino.TELEMETRY + (MainAction.startComm.getNOC_ID() << 4))){
+					if(inputData == (Comm.TELEMETRY + (MainAction.startComm.getNOC_ID() << 4))){
 						if( acceptTM ){
 							Telemetry.readTelemetry();
 							acceptTM = false;
@@ -57,12 +55,16 @@ public class InputCommThread extends Thread {
 						continue;
 					}
 				
-					if(inputData != 13){
-						MainAction.window1.print(Character.toString((char)inputData));
-						System.out.println("InputDataNotIdentified: 0x" + Integer.toHexString(inputData));
+					if( inputData == (Comm.BEACON + (MainAction.startComm.getIDvisitor() << 4)) ){
+						MainAction.window1.println("[NOC]: BEACON Received. Cut COMM");
+						MainAction.pauseSystem();
+						timeOut.pause();
 						continue;
 					}
-
+					
+					else{
+						MainAction.window1.println("[NOC]: Input Data not identified: 0x" + Integer.toHexString(inputData));
+					}
 				}
 				
 				try {
@@ -73,14 +75,6 @@ public class InputCommThread extends Thread {
 				}
 			}
 		}
-	}
-	
-	public void waitForEOT(boolean waitEOT){
-		wait = waitEOT;
-	}
-	
-	public boolean isWaiting(){
-		return wait;
 	}
 	
 	public void pause(){
