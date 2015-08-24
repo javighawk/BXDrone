@@ -1,4 +1,6 @@
 import java.awt.Color;
+import java.io.*;
+import java.util.concurrent.Semaphore;
 
 
 public class Telemetry{
@@ -17,19 +19,71 @@ public class Telemetry{
 	public final static byte TEL_MOTOROFFSETS = 0x14;
 	public final static byte TEL_ACCELRES	  = 0x15;
 	public final static byte TEL_GYRORES      = 0x16;
-	public final static int  TEL_TIME		  = 0x17;		/* TEMPORARY */
+	public final static int  TEL_TIME		  = 0x17;
 	public final static byte ENDOFTM		  = 0x05;
 	
 	private final static int[] accelRes = {2, 4, 8, 16},
 							   gyroRes = {250, 500, 1000, 2000};
 	private static int currentAccelRes = 0,
 					   currentGyroRes = 0;
+	
+	/*
+	 * Time data
+	 */
 	private static long time, delta, maxDelta, avgDelta;
 	
+	/*
+	 * Angles data
+	 */
+	private static double pitchAccel, rollAccel;
+	
+	/*
+	 * Motors speed data
+	 */
+	private static int[] mSpeed;
+	
+	/*
+	 * Motors speed (PID component)
+	 */
+	private static short[] diffMotors;
+	
+	/*
+	 * Determines whether we are recording data
+	 */
+	private static boolean isRecordingData = false;
+	
+	/* 
+	 * Accelerometer data
+	 */
+	private static short[] accel = new short[3];
+	
+	/*
+	 * Gyroscope data
+	 */
+	private static short[] gyro = new short[3];
+	
+	/*
+	 * File descriptors
+	 */
+	private static File timeData, accelData, gyroData, anglesData, mSpeedData, mDiffData;
+	
+	/*
+	 * File writers
+	 */
+	private static FileWriter timeWriter, accelWriter, gyroWriter, anglesWriter, mSpeedWriter, mDiffWriter;
+	
+	/*
+	 * Buffered writers
+	 */
+	private static BufferedWriter timeBW, accelBW, gyroBW, anglesBW, mSpeedBW, mDiffBW;
+	
+	/*
+	 * Semaphore to control the Files access
+	 */
+	private static Semaphore filesSemaphore = new Semaphore(1);
+	
 	public static void readTelemetry(){
-		int inputTelemetry, m1=0, m2=0, m3=0, m4=0;
-		short[] accel = new short[3];
-		short[] gyro = new short[3];
+		int inputTelemetry;
 		
 		while( (inputTelemetry = MainAction.arduino.readData()) != 
 			 (  Telemetry.ENDOFTM + (MainAction.startComm.getNOC_ID() << 4))){
@@ -55,37 +109,27 @@ public class Telemetry{
 							avgDelta = (avgDelta << 8) + inputTelemetry;
 					long second = (time / 1000) % 60;
 					long minute = (time / (1000 * 60));
-					MainAction.window1.labelTime.setText(Long.toString(minute) + ":" + Long.toString(second));
-					MainAction.window1.deltaBar.setValue((int)delta);
-					MainAction.window1.deltaBar.setString(Long.toString(delta) + " us");
-					MainAction.window1.maxDeltaBar.setValue((int)maxDelta);
-					MainAction.window1.maxDeltaBar.setString(Long.toString(maxDelta) + " us");
-					MainAction.window1.avgDeltaBar.setValue((int)avgDelta);
-					MainAction.window1.avgDeltaBar.setString(Long.toString(avgDelta) + " us");
+					MainAction.window1.labelTime.setText(String.format("%02d", minute) + ":" + String.format("%02d", second));
+					MainAction.window1.setTimeBarValues(delta, maxDelta, avgDelta);
+					calculatePitchRoll(accel, delta);
 					break;	
 				
 				case Telemetry.TEL_SPEED:
-					while((inputTelemetry = MainAction.arduino.readData()) != Comm.ENDOFPCK)
-						if(inputTelemetry != -1)
-							m1 = (m1 << 8) + inputTelemetry;
-					MainAction.window1.labelM1v.setText(Integer.toString(m1));
+					mSpeed = new int[4];
+					for( int i=3 ; i>=0 ; i-- ){
+						for( int j=0 ; j<2 ; j++ ){
+							while( (inputTelemetry = MainAction.arduino.readData()) == -1 );
+							if( inputTelemetry == Comm.ENDOFPCK ) break;
+							mSpeed[i] = (short) ((mSpeed[i] << 8) + inputTelemetry);
+						}
+						if( inputTelemetry == Comm.ENDOFPCK ) break;
+					}	
+					MainAction.window1.labelM1v.setText(Integer.toString(mSpeed[0]));
+					MainAction.window1.labelM2v.setText(Integer.toString(mSpeed[1]));
+					MainAction.window1.labelM3v.setText(Integer.toString(mSpeed[2]));
+					MainAction.window1.labelM4v.setText(Integer.toString(mSpeed[3]));
 					
-					while((inputTelemetry = MainAction.arduino.readData()) != Comm.ENDOFPCK)
-						if(inputTelemetry != -1)
-							m2 = (m2 << 8) + inputTelemetry;
-					MainAction.window1.labelM2v.setText(Integer.toString(m2));
-					
-					while((inputTelemetry = MainAction.arduino.readData()) != Comm.ENDOFPCK)
-						if(inputTelemetry != -1)
-							m3 = (m3 << 8) + inputTelemetry;
-					MainAction.window1.labelM3v.setText(Integer.toString(m3));
-					
-					while((inputTelemetry = MainAction.arduino.readData()) != Comm.ENDOFPCK)
-						if(inputTelemetry != -1)
-							m4 = (m4 << 8) + inputTelemetry;
-					MainAction.window1.labelM4v.setText(Integer.toString(m4));
-					
-					if( m1==0 && m2==0 && m3==0 & m4==0 ){
+					if( mSpeed[0]==0 && mSpeed[1]==0 && mSpeed[2]==0 & mSpeed[3]==0 ){
 						MainAction.window1.enablePIDCommand();
 						MainAction.window1.btnTestM1.setEnabled(true);
 						MainAction.window1.btnTestM2.setEnabled(true);
@@ -141,13 +185,14 @@ public class Telemetry{
 						MainAction.window1.sldOffM2.setEnabled(false);
 						MainAction.window1.sldOffM3.setEnabled(false);
 						MainAction.window1.sldOffM4.setEnabled(false);
+						MainAction.window1.slider.requestFocus();
 					}
 					
 					break;
 					
 				
 				case Telemetry.TEL_DIFFMOTOR:
-					short[] diffMotors = new short[4];
+					diffMotors = new short[4];
 					for( int i=3 ; i>=0 ; i-- ){
 						for( int j=0 ; j<2 ; j++ ){
 							while( (inputTelemetry = MainAction.arduino.readData()) == -1 );
@@ -163,6 +208,7 @@ public class Telemetry{
 					break;	
 					
 				case Telemetry.TEL_ACCEL:
+					accel = new short[3];
 					for( int i=2 ; i>=0 ; i-- ){
 						for( int j=0 ; j<2 ; j++ ){
 							while( (inputTelemetry = MainAction.arduino.readData()) == -1 );
@@ -248,8 +294,6 @@ public class Telemetry{
 					MainAction.window1.sliderAlphaDeg.setValue((int)(alphaDeg*100));
 					break;
 					
-					
-					
 				case Telemetry.TEL_ACCELOFFSETS:
 					short aOffX=0, aOffY=0, aOffZ=0;
 					
@@ -274,6 +318,7 @@ public class Telemetry{
 					break;
 					
 				case Telemetry.TEL_GYRO:
+					gyro = new short[3];
 					for( int i=2 ; i>=0 ; i-- ){
 						for( int j=0 ; j<2 ; j++ ){
 							while( (inputTelemetry = MainAction.arduino.readData()) == -1 );
@@ -291,7 +336,6 @@ public class Telemetry{
 					MainAction.window1.labelGyroX.setText(sgX);
 					MainAction.window1.labelGyroY.setText(sgY);
 					MainAction.window1.labelGyroZ.setText(sgZ);
-					calculatePitchRoll(accel, delta);
 					break;
 					
 
@@ -407,16 +451,20 @@ public class Telemetry{
 					break;				
 			}	
 		}
+		
+		/* Record data */
+		if( isRecordingData )
+			recordCurrentData();
 	}
 	
 	
 	/*
-	 * Calculate Pitch and Roll angles from the Gyro and Accel data values
+	 * Calculate Pitch and Roll angles from the Accel data values
 	 */
 	private static void calculatePitchRoll(short[] accel, double delta){
 		
-		double pitchAccel = Math.atan2(accel[1], accel[2]);
-		double rollAccel = Math.atan2(accel[0], Math.sqrt(Math.pow(accel[1],2) + Math.pow(accel[2],2)));
+		pitchAccel = Math.atan2(accel[1], accel[2]);
+		rollAccel = Math.atan2(accel[0], Math.sqrt(Math.pow(accel[1],2) + Math.pow(accel[2],2)));
 		
 		pitchAccel *= 180.0/Math.PI;
 		rollAccel *= 180.0/Math.PI;
@@ -429,5 +477,147 @@ public class Telemetry{
 		
 		MainAction.window1.labelPitch.setText(p + "º");
 		MainAction.window1.labelRoll.setText(r + "º");
+	}
+	
+	public static void startRecordingData(){
+		
+		try{
+			
+			/* Request access */
+			filesSemaphore.acquire();
+		
+			/* Initialize files */
+			timeData = new File("timeData.txt");
+			accelData = new File("accelData.txt");
+			gyroData = new File("gyroData.txt");
+			anglesData = new File("anglesData.txt");
+			mSpeedData = new File("mSpeedData.txt");
+			mDiffData = new File("mDiffData.txt");
+			
+			/* Create files (overwrite if they exist) and folder */
+			timeData.createNewFile();
+			accelData.createNewFile();
+			gyroData.createNewFile();
+			anglesData.createNewFile();
+			mSpeedData.createNewFile();
+			mDiffData.createNewFile();
+			
+			/* Initialize FileWriters */
+			timeWriter = new FileWriter(timeData.getAbsoluteFile());
+			accelWriter = new FileWriter(accelData.getAbsoluteFile());
+			gyroWriter = new FileWriter(gyroData.getAbsoluteFile());
+			anglesWriter = new FileWriter(anglesData.getAbsoluteFile());
+			mSpeedWriter = new FileWriter(mSpeedData.getAbsoluteFile());
+			mDiffWriter = new FileWriter(mDiffData.getAbsoluteFile());
+			
+			/* Initialize Buffered writers */
+			timeBW = new BufferedWriter(timeWriter);
+			accelBW = new BufferedWriter(accelWriter);
+			gyroBW = new BufferedWriter(gyroWriter);
+			anglesBW = new BufferedWriter(anglesWriter);
+			mSpeedBW = new BufferedWriter(mSpeedWriter);
+			mDiffBW = new BufferedWriter(mDiffWriter);
+			
+			/* Turn flag up */
+			isRecordingData = true;
+			
+			/* Change label on GUI */
+			MainAction.window1.lblRecordStatus.setText("REC");
+			MainAction.window1.lblRecordStatus.setForeground(Color.RED);
+
+			/* Release access */
+			filesSemaphore.release();
+		
+		} catch (Exception e){
+			e.printStackTrace();
+		}
+	}
+	
+	private static void recordCurrentData(){
+		
+		try{
+			
+			/* Request access */
+			filesSemaphore.acquire();
+			
+			if( isRecordingData ){
+			
+				/* Write time data */
+				timeBW.write(Long.toString(time));
+				timeBW.newLine();
+				
+				/* Write accel data */
+				accelBW.write("X:" + Double.toString((double)accel[0]*accelRes[currentAccelRes]/0x7FFF) + "\t");
+				accelBW.write("Y:" + Double.toString((double)accel[1]*accelRes[currentAccelRes]/0x7FFF) + "\t");
+				accelBW.write("Z:" + Double.toString((double)accel[2]*accelRes[currentAccelRes]/0x7FFF));
+				accelBW.newLine();
+				
+				/* Write gyro data */
+				gyroBW.write("X:" + Double.toString((double)gyro[0]*gyroRes[currentGyroRes]/0x7FFF) + "\t");
+				gyroBW.write("Y:" + Double.toString((double)gyro[1]*gyroRes[currentGyroRes]/0x7FFF) + "\t");
+				gyroBW.write("Z:" + Double.toString((double)gyro[2]*gyroRes[currentGyroRes]/0x7FFF));
+				gyroBW.newLine();
+				
+				/* Write angles speed data */
+				anglesBW.write("PITCH:" + Double.toString(pitchAccel) + "\t");
+				anglesBW.write("ROLL:" + Double.toString(rollAccel));
+				anglesBW.newLine();
+				
+				/* Write motors speed data */
+				mSpeedBW.write("M1:" + Integer.toString(mSpeed[0]) + "\t");
+				mSpeedBW.write("M2:" + Integer.toString(mSpeed[1]) + "\t");
+				mSpeedBW.write("M3:" + Integer.toString(mSpeed[2]) + "\t");
+				mSpeedBW.write("M4:" + Integer.toString(mSpeed[3]));
+				mSpeedBW.newLine();
+				
+				/* Write motors PID speed data */
+				mDiffBW.write("M1_DIFF:" + Double.toString(((double)diffMotors[0])/100) + "\t");
+				mDiffBW.write("M2_DIFF:" + Double.toString(((double)diffMotors[1])/100) + "\t");
+				mDiffBW.write("M3_DIFF:" + Double.toString(((double)diffMotors[2])/100) + "\t");
+				mDiffBW.write("M4_DIFF:" + Double.toString(((double)diffMotors[3])/100));
+				mDiffBW.newLine();
+				
+			}
+			
+			/* Release access */
+			filesSemaphore.release();
+			
+		} catch (Exception e){
+			e.printStackTrace();
+		}	
+	}
+	
+	public static void stopRecordingData(){
+		
+		try {
+			
+			/* Request access */
+			filesSemaphore.acquire();
+			
+			/* Close buffered writers */
+			timeBW.close();
+			accelBW.close();
+			gyroBW.close();
+			anglesBW.close();
+			mSpeedBW.close();
+			mDiffBW.close();
+			
+			/* Turn flag down */
+			isRecordingData = false;
+			
+			/* Change label on GUI */
+			MainAction.window1.lblRecordStatus.setText("OFF");
+			MainAction.window1.lblRecordStatus.setForeground(Color.BLACK);
+			
+			/* Release access */
+			filesSemaphore.release();
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static boolean isRecordingData(){
+		return isRecordingData;
 	}
 }

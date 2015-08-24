@@ -98,21 +98,15 @@ void endTM(){
 void motorsSpeedTelemetry(){
     
     /* Motors speed */
-    int m1s = getMotorSpeed(1), 
-        m2s = getMotorSpeed(2), 
-        m3s = getMotorSpeed(3), 
-        m4s = getMotorSpeed(4);
+    int mSpeed[4];
+    mSpeed[0] = getMotorSpeed(1), 
+    mSpeed[1] = getMotorSpeed(2), 
+    mSpeed[2] = getMotorSpeed(3), 
+    mSpeed[3] = getMotorSpeed(4);
 
-    // Send Motors speed
+    /* Send Motors speed */
     SerialSendData( byte(TEL_SPEED), 1 );
-    SerialSendData( m1s, 2 );
-    Serial.write( ENDOFPCK );
-    SerialSendData( m2s, 2 );
-    Serial.write( ENDOFPCK );
-    SerialSendData( m3s, 2 );
-    Serial.write( ENDOFPCK );
-    SerialSendData( m4s, 2 );
-    Serial.write( ENDOFPCK );
+    SerialSendData2( (byte *)mSpeed, 8 );
 }
 
 void motorsDiffTelemetry(){

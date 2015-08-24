@@ -43,6 +43,7 @@ public class MainAction{
 	}	
 	
 	public static void pauseSystem(){
+		Telemetry.stopRecordingData();
 		inputS.pause();
 		outputS.pause();
 		arduino.serialPort.close();

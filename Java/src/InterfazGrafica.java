@@ -9,8 +9,10 @@ import java.awt.event.MouseListener;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+
 import javax.swing.border.TitledBorder;
 import javax.swing.border.EtchedBorder;
 
@@ -98,12 +100,11 @@ public class InterfazGrafica extends JFrame{
     public JProgressBar maxDeltaBar;
     public JProgressBar deltaBar;
     public JLabel labelTime;
+    public JButton btnStartRecording;
+    public JLabel lblRecordStatus;
     
     /**
-     * Constructor. Abre una nueva ventana en la que 
-     * inserta todos los componentes y un tablero.
-     * 
-     * @param tablero Tablero que se dibuja
+     * Constructor
      */
     public InterfazGrafica(){
         super("Arduino");
@@ -1700,7 +1701,7 @@ public class InterfazGrafica extends JFrame{
         JPanel panel_17 = new JPanel();
         panel_17.setLayout(null);
         panel_17.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "Time data", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-        panel_17.setBounds(400, 415, 241, 122);
+        panel_17.setBounds(400, 351, 241, 122);
         panel_1.add(panel_17);
         
         JLabel lblTime = new JLabel("Time:");
@@ -1752,6 +1753,35 @@ public class InterfazGrafica extends JFrame{
         avgDeltaBar.setMaximum(3000);
         avgDeltaBar.setBounds(112, 96, 116, 14);
         panel_17.add(avgDeltaBar);
+        
+        JPanel panel_18 = new JPanel();
+        panel_18.setLayout(null);
+        panel_18.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "Record data", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+        panel_18.setBounds(400, 477, 241, 60);
+        panel_1.add(panel_18);
+        
+        btnStartRecording = new JButton("Start recording");
+        btnStartRecording.setFont(new Font("Tahoma", Font.PLAIN, 11));
+        btnStartRecording.setBounds(10, 22, 129, 23);
+        btnStartRecording.addActionListener(new ActionListener(){
+        	public void actionPerformed(ActionEvent arg0){
+        		if( !Telemetry.isRecordingData() ){
+        			Telemetry.startRecordingData();
+        			MainAction.window1.btnStartRecording.setText("Stop recording");
+        		} else {
+        			Telemetry.stopRecordingData();
+        			MainAction.window1.btnStartRecording.setText("Start recording");
+        		}
+        	}
+        });
+        btnStartRecording.addKeyListener(new ArduinoKeyListener());
+        panel_18.add(btnStartRecording);
+        
+        lblRecordStatus = new JLabel("OFF");
+        lblRecordStatus.setHorizontalAlignment(SwingConstants.CENTER);
+        lblRecordStatus.setFont(new Font("Courier New", Font.PLAIN, 14));
+        lblRecordStatus.setBounds(151, 26, 80, 14);
+        panel_18.add(lblRecordStatus);
         
         btnTestM2.addActionListener(new ActionListener(){
         	public void actionPerformed(ActionEvent arg0){
@@ -1847,6 +1877,17 @@ public class InterfazGrafica extends JFrame{
     	lblOffM3.setText("N/A");
     	lblOffM4.setText("N/A");
     	
+    	labelTime.setText("N/A");
+    	deltaBar.setString("N/A");
+    	maxDeltaBar.setString("N/A");
+    	avgDeltaBar.setString("N/A");
+    	
+    	deltaBar.setValue(0);
+    	maxDeltaBar.setValue(0);
+    	avgDeltaBar.setValue(0);
+    	
+    	btnStartRecording.setEnabled(false);
+    	
     	button.requestFocus();
     	
     	disablePIDCommand();
@@ -1876,7 +1917,8 @@ public class InterfazGrafica extends JFrame{
     	enablePIDCommand();
     	
     	button.setEnabled(false); 
-    	slider.requestFocus();    
+    	slider.requestFocus();  
+    	
     	clearTelemetry();
     	
     	sliderAlphaGyro.setEnabled(true);
@@ -1892,6 +1934,8 @@ public class InterfazGrafica extends JFrame{
     	btnSetStillLevel.setEnabled(true);
     	btnSetLevel.setEnabled(true);
     	defaultGOffsets.setEnabled(true);
+    	
+    	btnStartRecording.setEnabled(true);
     	
     }
     
@@ -1936,6 +1980,8 @@ public class InterfazGrafica extends JFrame{
     	lblOffZ.setText("0");
     	lbl0Pitch.setText("0");
     	lbl0Roll.setText("0");
+    	
+    	labelTime.setText("00:00");
     }
     
     public void disablePIDCommand(){
@@ -1964,6 +2010,43 @@ public class InterfazGrafica extends JFrame{
     	lblOffX.setText(Integer.toString(x));
     	lblOffY.setText(Integer.toString(y));
     	lblOffZ.setText(Integer.toString(z));
+    }
+    
+    public void setTimeBarValues(long delta, long maxDelta, long avgDelta){
+    	
+    	/* Delta bar color */
+    	if( delta <= 1000 )
+    		deltaBar.setForeground(Color.GREEN);
+    	else if( delta <= 2000 )
+    		deltaBar.setForeground(Color.ORANGE);
+    	else
+    		deltaBar.setForeground(Color.RED);
+    	
+    	/* Max Delta bar color */
+    	if( maxDelta <= 1000 )
+    		maxDeltaBar.setForeground(Color.GREEN);
+    	else if( maxDelta <= 2000 )
+    		maxDeltaBar.setForeground(Color.ORANGE);
+    	else
+    		maxDeltaBar.setForeground(Color.RED);
+    	
+    	/* Avg Delta bar color */
+    	if( avgDelta <= 1000 )
+    		avgDeltaBar.setForeground(Color.GREEN);
+    	else if( avgDelta <= 2000 )
+    		avgDeltaBar.setForeground(Color.ORANGE);
+    	else
+    		avgDeltaBar.setForeground(Color.RED);
+    	
+    	/* Set values */
+		MainAction.window1.deltaBar.setValue((int)delta);
+		MainAction.window1.maxDeltaBar.setValue((int)maxDelta);
+		MainAction.window1.avgDeltaBar.setValue((int)avgDelta);
+    	
+		/* Set strings */
+    	MainAction.window1.deltaBar.setString(Long.toString(delta) + " us");
+    	MainAction.window1.maxDeltaBar.setString(Long.toString(maxDelta) + " us");
+    	MainAction.window1.avgDeltaBar.setString(Long.toString(avgDelta) + " us");
     }
 }
 
