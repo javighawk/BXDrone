@@ -251,12 +251,12 @@ public class Telemetry{
 						}
 					}
 					
-					MainAction.window1.lblP0v.setText(Double.toString(((double)PIDKv[0][0])/100));
-					MainAction.window1.lblI0v.setText(Double.toString(((double)PIDKv[0][1])/100));
-					MainAction.window1.lblD0v.setText(Double.toString(((double)PIDKv[0][2])/100));
-					MainAction.window1.lblP1v.setText(Double.toString(((double)PIDKv[1][0])/100));
-					MainAction.window1.lblI1v.setText(Double.toString(((double)PIDKv[1][1])/100));
-					MainAction.window1.lblD1v.setText(Double.toString(((double)PIDKv[1][2])/100));
+					MainAction.window1.lblP0v.setText(Double.toString(((double)PIDKv[0][0])/10000));
+					MainAction.window1.lblI0v.setText(Double.toString(((double)PIDKv[0][1])/10000));
+					MainAction.window1.lblD0v.setText(Double.toString(((double)PIDKv[0][2])/10000));
+					MainAction.window1.lblP1v.setText(Double.toString(((double)PIDKv[1][0])/10000));
+					MainAction.window1.lblI1v.setText(Double.toString(((double)PIDKv[1][1])/10000));
+					MainAction.window1.lblD1v.setText(Double.toString(((double)PIDKv[1][2])/10000));
 					
 					MainAction.window1.sliderP0.setValue(PIDKv[0][0]);
 					MainAction.window1.sliderI0.setValue(PIDKv[0][1]);

@@ -40,7 +40,8 @@ void shortCutCommands(){
 
 
 void CMD_PIDValues(){
-            byte pid, roll, value;
+            byte pid, roll;
+            int value;
         
             while(!Serial.available()){
                 if( checkTimeOut() ) return;
@@ -63,17 +64,25 @@ void CMD_PIDValues(){
             }
             
             digitalWrite(SERIALPIN, LOW);
-            value = Serial.read();
+            value = Serial.read() << 8;
+            digitalWrite(SERIALPIN, HIGH);
+            
+            while(!Serial.available()){
+                if( checkTimeOut() ) return;
+            }
+            
+            digitalWrite(SERIALPIN, LOW);
+            value += Serial.read();
             digitalWrite(SERIALPIN, HIGH);
             
             if( roll==0xFF && pid==0xFF && value==0xFF ){
-                setPIDValues(0, 0, double(DEFAULT_PVALUE_ANGLES)/100);
-                setPIDValues(0, 1, double(DEFAULT_IVALUE_ANGLES)/100);
-                setPIDValues(0, 2, double(DEFAULT_DVALUE_ANGLES)/100);
-                setPIDValues(1, 0, double(DEFAULT_PVALUE_GYRO)/100);
-                setPIDValues(1, 1, double(DEFAULT_IVALUE_GYRO)/100);
-                setPIDValues(1, 2, double(DEFAULT_DVALUE_GYRO)/100);
-            } else setPIDValues( roll, pid, double(value)/100 );
+                setPIDValues(0, 0, double(DEFAULT_PVALUE_ANGLES)/10000);
+                setPIDValues(0, 1, double(DEFAULT_IVALUE_ANGLES)/10000);
+                setPIDValues(0, 2, double(DEFAULT_DVALUE_ANGLES)/10000);
+                setPIDValues(1, 0, double(DEFAULT_PVALUE_GYRO)/10000);
+                setPIDValues(1, 1, double(DEFAULT_IVALUE_GYRO)/10000);
+                setPIDValues(1, 2, double(DEFAULT_DVALUE_GYRO)/10000);
+            } else setPIDValues( roll, pid, double(value)/10000 );
             pendPIDTM();
 }
 

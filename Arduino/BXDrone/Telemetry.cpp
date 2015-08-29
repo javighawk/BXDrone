@@ -186,7 +186,7 @@ void PIDTelemetry(){
     // Send PID Values    
     for( i=0; i<2 ; i++ ){
         for( j=0 ; j<3 ; j++ ){
-            int val = int(getPIDValues(i,j)*100);
+            int val = int(getPIDValues(i,j)*10000);
             SerialSendData(val, 2);
             Serial.write( ENDOFPCK );
         }

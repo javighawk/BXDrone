@@ -156,14 +156,6 @@ public class Comm{
 		outputData = (short) (outputData & SPEEDMASK);
 		outputData = (short) (outputData | speed);
     }
-    
-//    /**
-//     * Sends speed 0 to Arduino and tells the
-//     * inputStream to wait for ACK
-//     */
-//    public void standBy(){
-//	    outputData = (short) (outputData & SPEEDMASK);
-//    }
  
     
     //**************************************************************//
@@ -212,32 +204,35 @@ public class Comm{
     	sendData((short) roll);
     	sendData((short) pid);
     	
+    	short value = 0;
+    	
     	switch(pid){
     	
     		case 0:
     			if(roll == 0)
-    				sendData((short) MainAction.window1.sliderP0.getValue());
+    				value = (short) MainAction.window1.sliderP0.getValue();
     			if(roll == 1)
-    				sendData((short) MainAction.window1.sliderP1.getValue());
+    				value = (short) MainAction.window1.sliderP1.getValue();
     			break;
     			
     			
     		case 1:
     			if(roll == 0)
-    				sendData((short) MainAction.window1.sliderI0.getValue());
+    				value = (short) MainAction.window1.sliderI0.getValue();
     			if(roll == 1)
-    				sendData((short) MainAction.window1.sliderI1.getValue());
+    				value = (short) MainAction.window1.sliderI1.getValue();
     			break;
     			
     			
     		case 2:
     			if(roll == 0)
-    				sendData((short) MainAction.window1.sliderD0.getValue());
+    				value = (short) MainAction.window1.sliderD0.getValue();
     			if(roll == 1)
-    				sendData((short) MainAction.window1.sliderD1.getValue());
+    				value = (short) MainAction.window1.sliderD1.getValue();
     			break;
     	}
-    	
+    	sendData((short) (value >> 8));
+    	sendData(value);
     	MainAction.OCOMMSemaphore.release();
     }
     

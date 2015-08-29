@@ -15,10 +15,10 @@
 /**************** DEFINES ****************/
 /*****************************************/
 
-#define DEFAULT_PVALUE_ANGLES     10
+#define DEFAULT_PVALUE_ANGLES   1000
 #define DEFAULT_IVALUE_ANGLES      0
 #define DEFAULT_DVALUE_ANGLES      0
-#define DEFAULT_PVALUE_GYRO       50
+#define DEFAULT_PVALUE_GYRO     5000
 #define DEFAULT_IVALUE_GYRO        0
 #define DEFAULT_DVALUE_GYRO        0
 

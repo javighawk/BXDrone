@@ -23,12 +23,12 @@ double setPointGX = 0, setPointGY = 0;
 int desiredPitch, desiredRoll;
 
 /* Default values for PID parameters */
-double PIDKv[2][3] = { {double(DEFAULT_PVALUE_ANGLES)/100, 
-                        double(DEFAULT_IVALUE_ANGLES)/100, 
-                        double(DEFAULT_DVALUE_ANGLES)/100},
-                       {double(DEFAULT_PVALUE_GYRO)/100, 
-                        double(DEFAULT_IVALUE_GYRO)/100, 
-                        double(DEFAULT_DVALUE_GYRO)/100}};
+double PIDKv[2][3] = { {double(DEFAULT_PVALUE_ANGLES)/10000, 
+                        double(DEFAULT_IVALUE_ANGLES)/10000, 
+                        double(DEFAULT_DVALUE_ANGLES)/10000},
+                       {double(DEFAULT_PVALUE_GYRO)/10000, 
+                        double(DEFAULT_IVALUE_GYRO)/10000, 
+                        double(DEFAULT_DVALUE_GYRO)/10000}};
 
 /* PID's controlling Pitch and Roll, calculated from Accelerometer readings */
 PID pidAccelX(&accelXPID, &diffSpeed_AX, &setPointAX, PIDKv[0][0], PIDKv[0][1], PIDKv[0][2], DIRECT);
