@@ -7,8 +7,8 @@
 /*****************************************/
 
 #include "BXD.h"
-#include "I2Cdev.h"
-#include "MPU6050.h"
+#include <I2Cdev.h>
+#include <MPU6050.h>
 #include "Telemetry.h"
 
 /*****************************************/
@@ -41,8 +41,6 @@ void setOffsets( int dev, int axis, int val );
 void setDegLPFAlpha( double alpha );
 void setAccelLPFAlpha( double alpha );
 void setGyroLPFAlpha( double alpha );
-double getPitch();
-double getRoll();
 int16_t *getAccelValues();
 int16_t *getGyroValues();
 int16_t getRawAccelX();
@@ -51,12 +49,6 @@ int16_t getRawAccelZ();
 int16_t getRawGyroX();
 int16_t getRawGyroY();
 int16_t getRawGyroZ();
-double getAccelXG();
-double getAccelYG();
-double getAccelZG();
-double getGyroXDPS();
-double getGyroYDPS();
-double getGyroZDPS();
 int getAccelCurrentRes();
 int getGyroCurrrentRes();
 int getAccelOffsetX();

@@ -4,8 +4,8 @@
 #include "Telemetry.h"
 #include "PIDManager.h"
 #include "BXCommandMode.h"
-#include "I2Cdev.h"
-#include "MPU6050.h"
+#include <I2Cdev.h>
+#include <MPU6050.h>
 #include "Wire.h"
 #include <PID_v1.h>
 #include <Servo.h>

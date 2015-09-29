@@ -6,17 +6,11 @@ MPU6050 IMU;
 /* Accelerometer readings */
 int accel[3];
 
-/* Accelerometer readings in [G] units */
-double accelG[3];
-
 /* Available Accel resolutions (in "g" units) */
 int accelRes[4] = {2, 4, 8, 16};
 
 /* Gyroscope readings */
 int gyro[3];
-
-/* Gyroscope readings in [deg/sec] units */
-double gyroDPS[3];
 
 /* Available Gyro resolutions (degrees per second) */
 int gyroRes[4] = {250, 500, 1000, 2000};
@@ -33,19 +27,12 @@ int gyroOffsets[3] = {0,0,0};
 bool accelOffReady[3] = {true,true,true};
 bool gyroOffReady[3] = {true,true,true};
 
-/* Angles calculated from accelerometer readings in degrees */
-double accelPitchAngle, accelRollAngle;
-
 /* Time variables to compute angles difference with gyro info */
 unsigned long auxtime, delta, maxdelta = 0;
 
 /* Auxilair variable to calculate the average of delta ERASE LATER */
 int times = 0;
 unsigned long compute = 0, avgDelta = 0;
-bool activateMaxDelta = false;
-
-/* Angle values in degrees */
-double pitchAngle, rollAngle;
 
 /* LPF Parameters */
 double ALPHA_ACCEL = 1, ALPHA_GYRO = 1, ALPHA_DEG = 1;
@@ -66,27 +53,6 @@ void IMUInit(){
     IMU.getMotion6(&accel[0], &accel[1], &accel[2], &gyro[0], &gyro[1], &gyro[2]);
 }
 
-/* Compute the accelerometer readings */
-void computeAccel(){
-    
-    /* Calculate pitch and roll angles from accelerometer readings */
-    accelPitchAngle = atan2(accel[1], accel[2]);
-    accelRollAngle = atan2(accel[0], sqrt(pow(accel[1],2) + pow(accel[2],2)));
-}
-
-/* Compute the gyroscope readings */
-void computeGyro(){
-    
-    /* Convert readings to degrees per seconds */
-    gyroDPS[0] = double(gyro[0])*gyroRes[gyroCurrentRes]/32767;
-    gyroDPS[1] = double(gyro[1])*gyroRes[gyroCurrentRes]/32767;
-    gyroDPS[2] = double(gyro[2])*gyroRes[gyroCurrentRes]/32767;
-    
-    /* Converting into degreess to get the degrees variation in each axis */
-    gyroDPS[0] *= delta;  gyroDPS[0] /= 1000000;
-    gyroDPS[1] *= delta;  gyroDPS[1] /= 1000000;
-    gyroDPS[2] *= delta;  gyroDPS[2] /= 1000000;
-}
 
 /* Get readings from IMU and compute them to get the angles */
 void computeIMU(){
@@ -100,7 +66,7 @@ void computeIMU(){
         gyro[i] += gyroOffsets[i];
     }
     
-    /* Refresh time variables to compute pitch and roll */
+    /* Refresh time variables */
     delta = micros() - auxtime;
     auxtime = delta + auxtime;
     
@@ -188,8 +154,6 @@ void setGyroLPFAlpha( double alpha ){ ALPHA_GYRO = alpha; }
 
 
 /* Getters */
-double getPitch(){ return pitchAngle; }
-double getRoll(){ return rollAngle; }
 int16_t *getAccelValues(){ return accel; }
 int16_t *getGyroValues(){ return gyro; }
 int16_t getRawAccelX(){ return accel[0]; }
@@ -198,12 +162,6 @@ int16_t getRawAccelZ(){ return accel[2]; }
 int16_t getRawGyroX(){ return gyro[0]; }
 int16_t getRawGyroY(){ return gyro[1]; }
 int16_t getRawGyroZ(){ return gyro[2]; }
-double getAccelXG(){ return accelG[0]; }
-double getAccelYG(){ return accelG[1]; }
-double getAccelZG(){ return accelG[2]; }
-double getGyroXDPS(){ return gyroDPS[0]; }
-double getGyroYDPS(){ return gyroDPS[1]; }
-double getGyroZDPS(){ return gyroDPS[2]; }
 int getAccelCurrentRes(){ return accelCurrentRes; }
 int getGyroCurrrentRes(){ return gyroCurrentRes; }
 int getAccelOffsetX(){ return accelOffsets[0]; }

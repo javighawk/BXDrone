@@ -42,165 +42,159 @@ boolean mPower[4];
 byte mOffset[4];
 
 void BX_initMoveMode(){
-  motor1.attach(MOTOR_PIN1);
-  motor2.attach(MOTOR_PIN2);
-  motor3.attach(MOTOR_PIN3);
-  motor4.attach(MOTOR_PIN4);
-  setMotorSpeed( 1, 0 );
-  setMotorSpeed( 2, 0 );
-  setMotorSpeed( 3, 0 );
-  setMotorSpeed( 4, 0 );
-  mPower[0] = true;
-  mPower[1] = true;
-  mPower[2] = true;
-  mPower[3] = true;
-  mOffset[0] = 0;  
-  mOffset[1] = 0;
-  mOffset[2] = 0;
-  mOffset[3] = 0;
-  
-  PID_setDesiredAngles(0,0);
+    motor1.attach(MOTOR_PIN1);
+    motor2.attach(MOTOR_PIN2);
+    motor3.attach(MOTOR_PIN3);
+    motor4.attach(MOTOR_PIN4);
+    setMotorSpeed( 1, 0 );
+    setMotorSpeed( 2, 0 );
+    setMotorSpeed( 3, 0 );
+    setMotorSpeed( 4, 0 );
+    mPower[0] = true;
+    mPower[1] = true;
+    mPower[2] = true;
+    mPower[3] = true;
+    mOffset[0] = 0;  
+    mOffset[1] = 0;
+    mOffset[2] = 0;
+    mOffset[3] = 0;
+    
+    PID_setDesiredAngles(0,0);
 }
 
 void runMoveMode(){
   
-  _byte = infoByte;
-  speedInfo = _byte & SPEED_MASK;
-  directionInfo = _byte & DIRECTION_MASK;
-  modeInfo = _byte & MODE_MASK;
-  
-  if( M1Speed == 0 && M2Speed == 0 && M3Speed == 0 && M4Speed == 0 )
-      BXDMoving = false;
-  else BXDMoving = true;
-  
-  if( speedInfo == 0 ){ Serial.write(EOT + (getIDvisitor() << 4) ); return; }
-  if( modeInfo == 0 ) ZMoveBot(speedInfo, directionInfo);
-  else if( modeInfo == 12 ) XYMoveBot(speedInfo, directionInfo);
+    _byte = infoByte;
+    speedInfo = _byte & SPEED_MASK;
+    directionInfo = _byte & DIRECTION_MASK;
+    modeInfo = _byte & MODE_MASK;
+    
+    if( speedInfo == 0 ){ Serial.write(EOT + (getIDvisitor() << 4) ); return; }
+    if( modeInfo == 0 ) ZMoveBot(speedInfo, directionInfo);
+    else if( modeInfo == 12 ) XYMoveBot(speedInfo, directionInfo);
 }
 
 void ZMoveBot(byte speedT, byte direction){
 
-  PID_setDesiredAngles(0,0);
+    PID_setDesiredAngles(0,0);
+    
+    switch(direction){
+        case 0x00:
+            M2Speed += speedT * 5;
+            M1Speed += speedT * 5;
+            M4Speed += speedT * 5;
+            M3Speed += speedT * 5;
+            break;
   
-  switch(direction){
-  case 0x00:
-    M2Speed += speedT * 5;
-    M1Speed += speedT * 5;
-    M4Speed += speedT * 5;
-    M3Speed += speedT * 5;
-    break;
-
-  case 0x10:
-    M2Speed -= speedT * 5;
-    M1Speed -= speedT * 5;
-    M4Speed -= speedT * 5;
-    M3Speed -= speedT * 5;
-    break;
-
-  case 0x20: break;
-
-  case 0x30: break;
-  }
-  
-  pendMotorSpeedTM();
+        case 0x10:
+            M2Speed -= speedT * 5;
+            M1Speed -= speedT * 5;
+            M4Speed -= speedT * 5;
+            M3Speed -= speedT * 5;
+            break;
+      
+        case 0x20: break;
+      
+        case 0x30: break;
+    }
+    
+    pendMotorSpeedTM();
 }
 
 void XYMoveBot(byte speedT, byte direction){
-
-//  setTotalSpeed(0);
   
-  switch(direction){
-  case 0x00: break;
-  case 0x10: setTotalSpeed(MAX_SPEED); break;
-  case 0x20: break;
-  case 0x30: break;
-  }
-  
-  pendMotorSpeedTM();
+    switch(direction){
+        case 0x00: break;
+        case 0x10: setTotalSpeed(MAX_SPEED); break;
+        case 0x20: break;
+        case 0x30: break;
+    }
+    
+    pendMotorSpeedTM();
 }
 
 
 void setMotorSpeed( int motor, int speed ){
-  if( motor < 1 || motor > 4 ) return;
+    if( motor < 1 || motor > 4 ) return;
+    
+    if( !mPower[motor-1] ) speed = 0;
   
-  if( !mPower[motor-1] ) speed = 0;
-
-  if( speed < 0 ) speed = 0;
-  if( speed > MAX_SPEED ) speed = MAX_SPEED;
-
-  switch(motor){
-      case 1:
-        motor1.writeMicroseconds( MIN_SIGNAL + speed );
-        M1Speed = speed;
-        break;
-    
-      case 2:
-        motor2.writeMicroseconds( MIN_SIGNAL + speed );
-        M2Speed = speed;
-        break;
-    
-      case 3:
-        motor3.writeMicroseconds( MIN_SIGNAL + speed );
-        M3Speed = speed;
-        break;
-    
-      case 4:
-        motor4.writeMicroseconds( MIN_SIGNAL + speed );
-        M4Speed = speed;
-        break;
-  }         
+    if( speed < 0 ) speed = 0;
+    if( speed > MAX_SPEED ) speed = MAX_SPEED;
+  
+    switch(motor){
+        case 1:
+            motor1.writeMicroseconds( MIN_SIGNAL + speed );
+            M1Speed = speed;
+            break;
+      
+        case 2:
+            motor2.writeMicroseconds( MIN_SIGNAL + speed );
+            M2Speed = speed;
+            break;
+        
+        case 3:
+            motor3.writeMicroseconds( MIN_SIGNAL + speed );
+            M3Speed = speed;
+            break;
+      
+        case 4:
+            motor4.writeMicroseconds( MIN_SIGNAL + speed );
+            M4Speed = speed;
+            break;
+    }         
 }
 
 void setAddingMotorSpeed( int motor ){
 
-  int mSpeed, diffSpeed;
-  
-  if( !mPower[motor-1] ){
-      diffSpeed = 0;
-      mSpeed = 0;
-  } else{  
-      diffSpeed = getDiffMotor(motor);
-      mSpeed = getMotorSpeed(motor);
-  }
-  
-  if (mSpeed < 0) mSpeed = 0;
-  else if (mSpeed > MAX_SPEED) mSpeed = MAX_SPEED;
-  
-  int speed = diffSpeed + mSpeed;
-
-  switch(motor){
-      case 1:
-        M1Speed = mSpeed;
-        speed += mOffset[0];
-        if( speed < 0 ) speed = 0;
-        if( speed > MAX_SPEED ) speed = MAX_SPEED;
-        motor1.writeMicroseconds( MIN_SIGNAL + speed );
-        break;
+    int mSpeed, diffSpeed;
     
-      case 2:
-        M2Speed = mSpeed;
-        speed += mOffset[1];
-        if( speed < 0 ) speed = 0;
-        if( speed > MAX_SPEED ) speed = MAX_SPEED;
-        motor2.writeMicroseconds( MIN_SIGNAL + speed );
-        break;
+    if( !mPower[motor-1] ){
+        diffSpeed = 0;
+        mSpeed = 0;
+    } else{  
+        diffSpeed = getDiffMotor(motor);
+        mSpeed = getMotorSpeed(motor);
+    }
     
-      case 3:
-        M3Speed = mSpeed;
-        speed += mOffset[2];
-        if( speed < 0 ) speed = 0;
-        if( speed > MAX_SPEED ) speed = MAX_SPEED;
-        motor3.writeMicroseconds( MIN_SIGNAL + speed );
-        break;
+    if (mSpeed < 0) mSpeed = 0;
+    else if (mSpeed > MAX_SPEED) mSpeed = MAX_SPEED;
     
-      case 4:
-        M4Speed = mSpeed;
-        speed += mOffset[3];
-        if( speed < 0 ) speed = 0;
-        if( speed > MAX_SPEED ) speed = MAX_SPEED;
-        motor4.writeMicroseconds( MIN_SIGNAL + speed );
-        break;
-  }         
+    int speed = diffSpeed + mSpeed;
+  
+    switch(motor){
+        case 1:
+            M1Speed = mSpeed;
+            speed += mOffset[0];
+            if( speed < 0 ) speed = 0;
+            if( speed > MAX_SPEED ) speed = MAX_SPEED;
+            motor1.writeMicroseconds( MIN_SIGNAL + speed );
+            break;
+      
+        case 2:
+            M2Speed = mSpeed;
+            speed += mOffset[1];
+            if( speed < 0 ) speed = 0;
+            if( speed > MAX_SPEED ) speed = MAX_SPEED;
+            motor2.writeMicroseconds( MIN_SIGNAL + speed );
+            break;
+      
+        case 3:
+            M3Speed = mSpeed;
+            speed += mOffset[2];
+            if( speed < 0 ) speed = 0;
+            if( speed > MAX_SPEED ) speed = MAX_SPEED;
+            motor3.writeMicroseconds( MIN_SIGNAL + speed );
+            break;
+      
+        case 4:
+            M4Speed = mSpeed;
+            speed += mOffset[3];
+            if( speed < 0 ) speed = 0;
+            if( speed > MAX_SPEED ) speed = MAX_SPEED;
+            motor4.writeMicroseconds( MIN_SIGNAL + speed );
+            break;
+    }         
 }
 
 void setTotalSpeed( int speed ){
@@ -257,5 +251,6 @@ byte getMotorOffset( int mot ){
 }
 
 bool isBXDMoving(){
-    return BXDMoving;
+    if( M1Speed == 0 && M2Speed == 0 && M3Speed == 0 && M4Speed == 0 ) return false;
+    return true;
 }
