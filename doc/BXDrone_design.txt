@@ -26,6 +26,13 @@ Server hardware:
 - XBee Explorer USB board
 
 
+SOFTWARE:
+=========
+Arduino IDE 1.6.8
+Eclipse Mars
+Eagle (for hardware design)
+
+
 MODULES:
 ========
 BXD_Controller: This is the code that will be loaded in the Teensy board. In charge of receiving commands from the server and sending telemetry to it. In each loop iteration these are the operations performed:
