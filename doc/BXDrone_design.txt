@@ -44,6 +44,8 @@ BXD_Server: This is the code that will be running in the Java machine. Receives 
 
 BXD_ServerSpeedController: This code is loaded in a simple Arduino board with a slider connected to it. This only serves the purpose of reading the value of the slider and sending it to the server (computer). The server will interpret this value as the speed we want to set the motors to.
 
+BXD_Matlab: Matlab code that collects the data recorded by the server and plots it in different graphs.
+
 
 LIBRARIES:
 ==========
