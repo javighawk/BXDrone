@@ -1,5 +1,4 @@
 #include "BXCOMM.h"
-#include <XBee.h>
 #include "TimeOut.h"
 #include "BXD.h"
 
