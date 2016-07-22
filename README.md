@@ -1,11 +1,7 @@
 BXDrone
 =======
-Lastest version of BXDrone software for Arduino and Computer (Java).
+BXDrone is a project that aims to develop a flight controller using an Arduino or Arduino-compatible  board, which would be aboard a quadcopter and will be receiving telecommands and sending telemetry to and from a computer. The Arduino board will use an IMU (Inertial Measurement Unit) to determine the pitch, roll and yaw angles and keep them on a desired value. The communication is intented to be wireless through XBee modules. However, for testing, a wired-serial communication through USB can be done.
 
-IMU used in this version is the MPU9150 purchased in SparkFun (https://www.sparkfun.com/products/11486).
+While most of the projects suggest to buy a flight controller and build a drone with it, the objective of this project is to get a deep insight on how the flight controller works, which problems can generate and how to solve them.
 
-Libraries needed:
-- For the Arduino program: PID library, version 1.0.1: Can be downloaded here http://playground.arduino.cc/Code/PIDLibrary
-
-- For the Computer (Java) program: RXTX Library: Can be downloaded here for Eclipse: http://jlog.org/rxtx-win.html
--- WindowBuilder plugin has been used for the Graphic User Interface on Eclipse
+Please refer to doc/ folder for further documentation.
