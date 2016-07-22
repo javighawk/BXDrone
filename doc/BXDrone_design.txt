@@ -4,13 +4,51 @@ Description:
 ============
 Example of doc
 
+
+HARDWARE:
+=========
+Drone hardware:
+-- Teensy 3.2 (Arduino compatible)
+-- Sparkfun MPU9150 Breakout board
+-- XBee S2 module
+-- Custom PCB (refer to hw_design/ folder)
+-- DJI F330 FlameWheel
+-- 11.1V 2200mAh LiPo battery
+-- 20A ESC (Currently using 20AMP 20A SimonK Firmware Brushless ESC)
+-- Vibration dampening balls (similar to http://www.hobbyking.com/hobbyking/store/catalog/34769.jpg)
+-- Electronic components (LED's, capacitors, resistors, etc.)
+
+Server hardware:
+- Any computer running Java
+- Arduino or any Arduino-compatible board (used for speed control)
+- Slider/Variable resistor
+- XBee S2 module
+- XBee Explorer USB board
+
+
 MODULES:
 ========
+BXD_Controller: This is the code that will be loaded in the Teensy board. In charge of receiving commands from the server and sending telemetry to it. In each loop iteration these are the operations performed:
+- Read pitch, roll and yaw angles from the IMU DMP module and adjust the motors speed (according to the PID settings) in order to achieve the desired angles.
+- Read for incoming data (this could be a movement order, a command such as change X parameter, test motors, etc. or a telemetry petition confirmation) and proceed with the corresponding task.
+- Send a telemetry petition (if needed. This is done each ~20ms. If no telemetry petition confirmation is received, this period is changed to 1 second).
+
+BXD_Server: This is the code that will be running in the Java machine. Receives data from the drone, displays all the telemetry in the GUI and sends the desired commands.
+
+BXD_ServerSpeedController: This code is loaded in a simple Arduino board with a slider connected to it. This only serves the purpose of reading the value of the slider and sending it to the server (computer). The server will interpret this value as the speed we want to set the motors to.
 
 
 LIBRARIES:
-============
+==========
+Arduino/Teensy:
+-- Wire
+-- Servo
+-- MPU6050 (https://github.com/sparkfun/MPU-9150_Breakout/tree/master/firmware/MPU6050)
+-- I2Cdev (https://github.com/sparkfun/MPU-9150_Breakout/tree/master/firmware/I2Cdev)
+-- PID (https://github.com/br3ttb/Arduino-PID-Library)
 
+Server:
+-- RXTXcomm (http://jlog.org/rxtx-win.html)
   
 
 Author: Javier Garcia
