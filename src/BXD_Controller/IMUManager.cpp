@@ -27,12 +27,22 @@ uint8_t intStatus;
 /* FIFO storage buffer */
 uint8_t fifoBuffer[64];
 
+/* Extern declaration */
+extern TimeRecord tIMU;
+
 
 /*
  * Interrupt callback function
  */
 void IMU_interrupt(){
+    // Stop time recording
+    tIMU.stop();
+
+    // Activate flag
     dataAvailable = true;
+
+    // Start time recording again
+    tIMU.trigger();
 }
 
 
