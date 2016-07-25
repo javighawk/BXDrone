@@ -3,6 +3,12 @@
 #include "BXMoveMode.h"
 #include "IMUManager.h"
 #include "PIDManager.h"
+#include "TimeRecord.h"
+
+/* Extern declarations */
+int MAIN_getNAllTimeRecord();
+TimeRecord **MAIN_getAllTimeRecord();
+
 
 /* Auxiliar variable to measure Telemetry period */
 unsigned long timer;
@@ -85,16 +91,30 @@ void TM_mSwitchTelemetry(){
  * Send time telemetry
  */
 void TM_timeTelemetry(){
-    // Get the time records
-    unsigned long times[1] = {millis()};
+    // Get array of all TimeRecord pointers and how many
+    TimeRecord **allTR = MAIN_getAllTimeRecord();
+    int nAllTR = MAIN_getNAllTimeRecord();
 
-    // Header
-    uint8_t header[3] = {sizeof(times[0]), sizeof(times)/sizeof(times[0]), TEL_TIMES};
+    // Get current time
+    unsigned long nowTime = millis();
+
+    // Get average time of all TimeRecord objects
+    unsigned long avgTimeRecord[nAllTR];
+    for( int i=0 ; i<nAllTR ; i++ ){
+        avgTimeRecord[i] = allTR[i]->getAvgTime();
+
+        // Reset all maxTime for TimeRecord objects
+        allTR[i]->resetMaxTRec();
+    }
+
+    // Prepare Header
+    uint8_t header[3] = {sizeof(nowTime), (uint8_t)(nAllTR + 1), TEL_TIMES};
     
-    // Send time data
+    // Send first the current time, and then all the TimeRecord average times
     COMM_write( header, 3 );
-    for( int i=0 ; i<header[1] ; i++ )
-        COMM_write( (uint8_t*)&times[i], header[0] );
+    COMM_write( (uint8_t*)&nowTime, header[0] );
+    for( int i=0 ; i<nAllTR ; i++ )
+        COMM_write( (uint8_t*)&avgTimeRecord[i], header[0] );        
 }
 
 
@@ -102,27 +122,34 @@ void TM_timeTelemetry(){
  * Send the time records labels
  */
 void TM_timeLabelsTelemetry(){
-    /* TBD
-    char labels[5][LABEL_LENGTH];
-    String labels_str[5] = {tLoop.TIME_getLabel(),
-                            tTelemetry.TIME_getLabel(),
-                            tConnected.TIME_getLabel(),
-                            tAvailable.TIME_getLabel(),
-                            tInfoRead.TIME_getLabel()};
+    // Get array of all TimeRecord pointers and how many
+    TimeRecord **allTR = MAIN_getAllTimeRecord();
+    int nAllTR = MAIN_getNAllTimeRecord();
+    
+    // Initialize variables to extract the TimeRecord labels
+    char labels[nAllTR][LABEL_LENGTH];
+    String labels_str[nAllTR];
 
-    for( int i=0 ; i<LABEL_LENGTH ; i++ )
-        for( int j=0 ; j<5 ; j++ )
-            if( i < labels_str[0].length() ) labels[j][i] = labels_str[j][i];
-            else labels[j][i] = 0;
+    // Iterate through all TimeRecord objects
+    for( int i=0 ; i<nAllTR ; i++ ){
+        // Get label
+        labels_str[i] = allTR[i]->getLabel();
 
+        // Copy the character array into a String. This will force all
+        // labels to have the same length
+        for( int j=0 ; j<LABEL_LENGTH ; j++ ){
+            if( j < labels_str[i].length() ) labels[i][j] = labels_str[i][j];
+            else labels[i][j] = 0;
+        }
+    }
+
+    // Prepare header to send
     uint8_t header[3] = {sizeof(labels[0]), sizeof(labels)/sizeof(labels[0]), TEL_TIMELABELS};
     COMM_write( header, 3 );
-    COMM_write( (uint8_t*)labels[0], header[0] );
-    COMM_write( (uint8_t*)labels[1], header[0] );
-    COMM_write( (uint8_t*)labels[2], header[0] );
-    COMM_write( (uint8_t*)labels[3], header[0] );
-    COMM_write( (uint8_t*)labels[4], header[0] );
-    */
+
+    // Send all labels
+    for( int i=0 ; i<nAllTR ; i++ )
+        COMM_write( (uint8_t*)labels[i], header[0] );
 }
 
 
