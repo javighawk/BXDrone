@@ -132,10 +132,10 @@ void TM_timeLabelsTelemetry(){
 void TM_PIDKvTelemetry(){
     uint16_t PIDKv[N_PID_CONTROLLERS][3];
 
-    // Get PID values
+    // Get PID values. Scale them (x1000) so we can send them as integers
     for( int i=0 ; i<N_PID_CONTROLLERS ; i++ )
         for( int j=0 ; j<3 ; j++ )
-            PIDKv[i][j] = (uint16_t)(PID_getKv(i,j) * 100);
+            PIDKv[i][j] = (uint16_t)(PID_getKv(i,j) * 1000);
 
     // Header
     uint8_t header[3] = {sizeof(PIDKv[0][0]), sizeof(PIDKv)/sizeof(PIDKv[0][0]), TEL_PIDKV};
