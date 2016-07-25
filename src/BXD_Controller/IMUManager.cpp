@@ -55,7 +55,8 @@ void IMU_init(){
     // Enable DMP
     IMU.setDMPEnabled(true);
 
-    // Enable interrupt
+    // Enable interrupt. 
+    // IMPORTANT! You need to set interrupt pins as INPUT when working with TEENSY
     pinMode(IMU_INTERRUPTPIN, INPUT);
     attachInterrupt(IMU_INTERRUPTPIN, IMU_interrupt, RISING);
 
