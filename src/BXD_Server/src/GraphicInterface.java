@@ -1042,8 +1042,8 @@ public class GraphicInterface extends JFrame{
         barGyroZ.setToolTipText("");
         barGyroZ.setStringPainted(true);
         barGyroZ.setString("0");
-        barGyroZ.setMinimum(-255);
-        barGyroZ.setMaximum(255);
+        barGyroZ.setMinimum(-90);
+        barGyroZ.setMaximum(90);
         barGyroZ.setForeground(new Color(255, 165, 0));
         barGyroZ.setBounds(33, 145, 116, 14);
         panel.add(barGyroZ);
@@ -1052,8 +1052,8 @@ public class GraphicInterface extends JFrame{
         barGyroY.setToolTipText("");
         barGyroY.setStringPainted(true);
         barGyroY.setString("0");
-        barGyroY.setMinimum(-255);
-        barGyroY.setMaximum(255);
+        barGyroY.setMinimum(-90);
+        barGyroY.setMaximum(90);
         barGyroY.setForeground(new Color(255, 165, 0));
         barGyroY.setBounds(33, 126, 116, 14);
         panel.add(barGyroY);
@@ -1062,8 +1062,8 @@ public class GraphicInterface extends JFrame{
         barGyroX.setToolTipText("");
         barGyroX.setStringPainted(true);
         barGyroX.setString("0");
-        barGyroX.setMinimum(-255);
-        barGyroX.setMaximum(255);
+        barGyroX.setMinimum(-90);
+        barGyroX.setMaximum(90);
         barGyroX.setForeground(new Color(255, 165, 0));
         barGyroX.setBounds(33, 107, 116, 14);
         panel.add(barGyroX);
@@ -1335,14 +1335,14 @@ public class GraphicInterface extends JFrame{
     	else if( rdbtnI.isSelected() ) param = 1;
     	else param = 2;
     	
-    	// Update GUI
-    	NumberFormat formatter = new DecimalFormat("#0.00");
-   		elblPR.setText(formatter.format(((double)PIDKv[0][param])/100));
-   		elblRR.setText(formatter.format(((double)PIDKv[1][param])/100));
-   		elblYR.setText(formatter.format(((double)PIDKv[2][param])/100));
-   		elblPS.setText(formatter.format(((double)PIDKv[3][param])/100));
-   		elblRS.setText(formatter.format(((double)PIDKv[4][param])/100));
-   		elblYS.setText(formatter.format(((double)PIDKv[5][param])/100));
+    	// Update GUI. Scale each PIDKv (they are pre-scaled by x1000)
+    	NumberFormat formatter = new DecimalFormat("#0.000");
+   		elblPR.setText(formatter.format(((double)PIDKv[0][param])/1000));
+   		elblRR.setText(formatter.format(((double)PIDKv[1][param])/1000));
+   		elblYR.setText(formatter.format(((double)PIDKv[2][param])/1000));
+   		elblPS.setText(formatter.format(((double)PIDKv[3][param])/1000));
+   		elblRS.setText(formatter.format(((double)PIDKv[4][param])/1000));
+   		elblYS.setText(formatter.format(((double)PIDKv[5][param])/1000));
    		sliderPR.setValue(PIDKv[0][param]);
    		sliderRR.setValue(PIDKv[1][param]);
    		sliderYR.setValue(PIDKv[2][param]);
@@ -1501,10 +1501,9 @@ public class GraphicInterface extends JFrame{
     	barGyroZ.setValue(xyz[2]);
     	
     	// Set strings on bars
-    	NumberFormat formatter = new DecimalFormat("#0.00");
-    	barGyroX.setString(formatter.format(((double)xyz[0])/100) + " dps");
-    	barGyroY.setString(formatter.format(((double)xyz[1])/100) + " dps");
-    	barGyroZ.setString(formatter.format(((double)xyz[2])/100) + " dps");
+    	barGyroX.setString(Integer.toString(xyz[0]) + " dps");
+    	barGyroY.setString(Integer.toString(xyz[1]) + " dps");
+    	barGyroZ.setString(Integer.toString(xyz[2]) + " dps");
     }
     
         

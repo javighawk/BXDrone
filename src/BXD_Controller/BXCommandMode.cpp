@@ -17,8 +17,8 @@ void CMD_PIDKv(){
     int value = COMM_read_wTimeOut();
     value = (value << 8) + COMM_read_wTimeOut();
 
-    // Set parameters
-    PID_setKv(PIDCtrl_id, param, ((double)value)/100);
+    // Set parameters. The value is scaled so we need to divide it.
+    PID_setKv(PIDCtrl_id, param, ((double)value)/1000);
 
     // Pending telemetry
     TM_pendPIDKvTM();

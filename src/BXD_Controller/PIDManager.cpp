@@ -36,7 +36,15 @@ void PID_init(){
                              PIDKv[i][1], 
                              PIDKv[i][2], 
                              DIRECT);
+
+        // Turn on PID
         PIDCtrl[i]->SetMode(AUTOMATIC);
+
+        // Set sample time to 1ms
+        PIDCtrl[i]->SetSampleTime(1);
+
+        // Set output within -200 and 200
+        PIDCtrl[i]->SetOutputLimits(-200,200);
     }
 }
 
@@ -53,7 +61,7 @@ void PID_compute(){
     // Compute Rate PIDs
     PIDCtrl[PID_PITCH_RATE]->Compute();
     PIDCtrl[PID_ROLL_RATE]->Compute();
-    //PIDCtrl[PID_YAW_RATE]->Compute();
+    PIDCtrl[PID_YAW_RATE]->Compute();
 
     // Apply PID speeds to motors
     MVM_setMPIDSpeed(MOTOR_FL, int( -pidOutputs[PID_PITCH_RATE] - pidOutputs[PID_ROLL_RATE]));
