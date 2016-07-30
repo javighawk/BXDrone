@@ -150,6 +150,7 @@
 <hole x="68.58" y="3.81" drill="2.54"/>
 <hole x="68.58" y="66.04" drill="2.54"/>
 <hole x="3.81" y="50.8" drill="2.54"/>
+<text x="10.16" y="12.7" size="1.778" layer="21" rot="R90">MPU9150-Breakout</text>
 </plain>
 <libraries>
 <library name="SM-VReg">
