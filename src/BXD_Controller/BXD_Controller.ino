@@ -5,19 +5,8 @@
 #include "IMUManager.h"
 #include "PIDManager.h"
 #include "Telemetry.h"
-#include "TimeRecord.h"
 #include "TimeOut.h"
 
-/* Time Record objects */
-TimeRecord tLoop("LOOP");
-TimeRecord tTM("TM");
-TimeRecord tIMU("IMU");
-
-/* Array with pointers to all TimeRecord objects we have */
-TimeRecord *allTimeRecord[3] = {&tLoop, &tIMU, &tTM};
-
-/* Number of TimeRecord objects we have */
-int nAllTimeRecord = sizeof(allTimeRecord)/sizeof(allTimeRecord[0]);
 
 /*
  * Setup function
@@ -46,9 +35,6 @@ void setup(){
  * Loop function
  */
 void loop(){
-    // Trigger time recording
-    tLoop.trigger();
-  
     // Compute IMU
     IMU_compute();
     
@@ -90,27 +76,4 @@ void loop(){
         // Otherwise, check if connection has timed out
         TMO_check();
     }
-
-    // Stop time recording
-    tLoop.stop();
-}
-
-
-/*
- * Getter
- * 
- * @returns Number of TimeRecord objects in the program
- */
-int MAIN_getNAllTimeRecord(){
-    return nAllTimeRecord;
-}
-
-
-/*
- * Getter
- * 
- * @returns Array of TimeRecord pointers
- */
-TimeRecord **MAIN_getAllTimeRecord(){
-    return allTimeRecord;
 }
