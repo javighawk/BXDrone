@@ -10,10 +10,11 @@
 
 /* Time Record objects */
 TimeRecord tLoop("LOOP");
+TimeRecord tTM("TM");
 TimeRecord tIMU("IMU");
 
 /* Array with pointers to all TimeRecord objects we have */
-TimeRecord *allTimeRecord[2] = {&tLoop, &tIMU};
+TimeRecord *allTimeRecord[3] = {&tLoop, &tIMU, &tTM};
 
 /* Number of TimeRecord objects we have */
 int nAllTimeRecord = sizeof(allTimeRecord)/sizeof(allTimeRecord[0]);

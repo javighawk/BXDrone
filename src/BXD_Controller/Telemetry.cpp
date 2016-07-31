@@ -8,7 +8,7 @@
 /* Extern declarations */
 int MAIN_getNAllTimeRecord();
 TimeRecord **MAIN_getAllTimeRecord();
-
+extern TimeRecord tTM;
 
 /* Auxiliar variable to measure Telemetry period */
 unsigned long timer;
@@ -247,6 +247,9 @@ void TM_end(){
  */
 void TM_start(){
     if( pendingTM ){
+        // Record Telemetry time
+        tTM.trigger();
+      
         // Send TM identifier
         COMM_write( TELEMETRY );
 
@@ -293,7 +296,10 @@ void TM_start(){
         }
 
         // End telemetry
-        TM_end();      
+        TM_end();
+
+        // Stop recording Telemetry time
+        tTM.stop();
     }
 }
 
