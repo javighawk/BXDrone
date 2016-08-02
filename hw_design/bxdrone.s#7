@@ -7365,7 +7365,7 @@ These are standard SMD and PTH capacitors. Normally 10uF, 47uF, and 100uF in ele
 </class>
 </classes>
 <parts>
-<part name="U$2" library="Teensy_3_and_LC_Series_Boards_v1.1" deviceset="TEENSY_3.1_DIL+4" device=""/>
+<part name="U$2" library="Teensy_3_and_LC_Series_Boards_v1.1" deviceset="TEENSY_3.1_DIL+4" device="" value="TEENSY_3.2"/>
 <part name="D1" library="SparkFun-LED" deviceset="LED" device="5MM"/>
 <part name="D2" library="SparkFun-LED" deviceset="LED" device="5MM"/>
 <part name="D3" library="SparkFun-LED" deviceset="LED" device="5MM"/>

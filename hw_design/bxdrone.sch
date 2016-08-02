@@ -7700,9 +7700,9 @@ These are standard SMD and PTH capacitors. Normally 10uF, 47uF, and 100uF in ele
 <label x="96.52" y="71.12" size="1.778" layer="95"/>
 </segment>
 <segment>
-<wire x1="226.06" y1="25.4" x2="208.28" y2="25.4" width="0.1524" layer="91"/>
-<label x="208.28" y="25.4" size="1.778" layer="95"/>
-<pinref part="J7" gate="G$1" pin="1"/>
+<wire x1="226.06" y1="48.26" x2="208.28" y2="48.26" width="0.1524" layer="91"/>
+<label x="208.28" y="48.26" size="1.778" layer="95"/>
+<pinref part="J8" gate="G$1" pin="2"/>
 </segment>
 </net>
 <net name="TX" class="0">
@@ -7712,9 +7712,9 @@ These are standard SMD and PTH capacitors. Normally 10uF, 47uF, and 100uF in ele
 <label x="96.52" y="68.58" size="1.778" layer="95"/>
 </segment>
 <segment>
-<wire x1="226.06" y1="48.26" x2="208.28" y2="48.26" width="0.1524" layer="91"/>
-<label x="208.28" y="48.26" size="1.778" layer="95"/>
-<pinref part="J8" gate="G$1" pin="2"/>
+<wire x1="226.06" y1="25.4" x2="208.28" y2="25.4" width="0.1524" layer="91"/>
+<label x="208.28" y="25.4" size="1.778" layer="95"/>
+<pinref part="J7" gate="G$1" pin="1"/>
 </segment>
 </net>
 <net name="XBEE_RX" class="0">
@@ -7863,28 +7863,30 @@ These are standard SMD and PTH capacitors. Normally 10uF, 47uF, and 100uF in ele
 </sheet>
 </sheets>
 <errors>
-<approved hash="102,1,190.5,160.02,VCC,+3V3,,,,"/>
-<approved hash="204,1,152.4,114.3,U$2,AGND,,,,"/>
-<approved hash="204,1,152.4,132.08,U$2,3.3V,,,,"/>
-<approved hash="204,1,152.4,116.84,U$2,AREF,,,,"/>
-<approved hash="204,1,152.4,137.16,U$2,VUSB,,,,"/>
-<approved hash="104,1,152.4,134.62,U$2,VIN,+5V,,,"/>
-<approved hash="202,1,190.5,149.86,U$1,RESET,,,,"/>
-<approved hash="202,1,190.5,139.7,U$1,DTR/DI8,,,,"/>
-<approved hash="202,1,238.76,144.78,U$1,VREF,,,,"/>
-<approved hash="113,1,7.94173,97.79,D1,,,,,"/>
-<approved hash="113,1,18.1017,97.79,D2,,,,,"/>
-<approved hash="113,1,28.2617,97.79,D3,,,,,"/>
-<approved hash="113,1,60.2827,97.9847,J2,,,,,"/>
-<approved hash="113,1,17.1027,62.4247,J3,,,,,"/>
-<approved hash="113,1,60.2827,62.4247,J4,,,,,"/>
-<approved hash="113,1,17.1027,26.8647,J5,,,,,"/>
-<approved hash="113,1,60.2827,26.8647,J6,,,,,"/>
-<approved hash="113,1,99.1604,168.123,5V_REG,,,,,"/>
-<approved hash="113,1,143.037,168.123,3V3_REG,,,,,"/>
-<approved hash="113,1,50.1227,170.375,J9,,,,,"/>
-<approved hash="113,1,77.47,171.458,SW_5V,,,,,"/>
-<approved hash="113,1,125.73,171.458,SW_3V3,,,,,"/>
+<approved hash="102,1,193.04,96.52,VCC,+3V3,,,,"/>
+<approved hash="204,1,154.94,50.8,U$2,AGND,,,,"/>
+<approved hash="204,1,154.94,68.58,U$2,3.3V,,,,"/>
+<approved hash="204,1,154.94,53.34,U$2,AREF,,,,"/>
+<approved hash="204,1,154.94,73.66,U$2,VUSB,,,,"/>
+<approved hash="104,1,154.94,71.12,U$2,VIN,+5V,,,"/>
+<approved hash="202,1,193.04,86.36,U$1,RESET,,,,"/>
+<approved hash="202,1,193.04,76.2,U$1,DTR/DI8,,,,"/>
+<approved hash="202,1,241.3,81.28,U$1,VREF,,,,"/>
+<approved hash="113,1,10.4817,62.23,D1,,,,,"/>
+<approved hash="113,1,20.6417,62.23,D2,,,,,"/>
+<approved hash="113,1,30.8017,62.23,D3,,,,,"/>
+<approved hash="113,1,62.8227,62.4247,J2,,,,,"/>
+<approved hash="113,1,19.6427,34.4847,J3,,,,,"/>
+<approved hash="113,1,62.8227,34.4847,J4,,,,,"/>
+<approved hash="113,1,19.6427,14.1647,J5,,,,,"/>
+<approved hash="113,1,62.8227,14.1647,J6,,,,,"/>
+<approved hash="113,1,229.277,20.1253,J7,,,,,"/>
+<approved hash="113,1,229.277,45.5253,J8,,,,,"/>
+<approved hash="113,1,101.7,104.623,5V_REG,,,,,"/>
+<approved hash="113,1,145.577,104.623,3V3_REG,,,,,"/>
+<approved hash="113,1,52.6627,106.875,J9,,,,,"/>
+<approved hash="113,1,80.01,107.958,SW_5V,,,,,"/>
+<approved hash="113,1,128.27,107.958,SW_3V3,,,,,"/>
 </errors>
 </schematic>
 </drawing>

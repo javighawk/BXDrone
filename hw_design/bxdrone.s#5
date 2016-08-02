@@ -6334,13 +6334,13 @@ Basic schematic elements and footprints for 0603, 1206, and PTH resistors.</desc
 <pad name="1" x="-2.54" y="0" drill="1.1" shape="long" rot="R90"/>
 <pad name="2" x="0" y="0" drill="1.1" shape="long" rot="R90"/>
 <pad name="3" x="2.54" y="0" drill="1.1" shape="long" rot="R90"/>
-<wire x1="-5.5" y1="2.5" x2="-5.5" y2="1.5" width="0.127" layer="21"/>
-<wire x1="-5.5" y1="1.5" x2="-5.5" y2="-2.5" width="0.127" layer="21"/>
+<wire x1="-5.5" y1="2.5" x2="-5.5" y2="1.8302" width="0.127" layer="21"/>
+<wire x1="-5.5" y1="1.8302" x2="-5.5" y2="-2.5" width="0.127" layer="21"/>
 <wire x1="-5.5" y1="-2.5" x2="5.5" y2="-2.5" width="0.127" layer="21"/>
-<wire x1="5.5" y1="-2.5" x2="5.5" y2="1.5" width="0.127" layer="21"/>
-<wire x1="5.5" y1="1.5" x2="5.5" y2="2.5" width="0.127" layer="21"/>
+<wire x1="5.5" y1="-2.5" x2="5.5" y2="1.8302" width="0.127" layer="21"/>
+<wire x1="5.5" y1="1.8302" x2="5.5" y2="2.5" width="0.127" layer="21"/>
 <wire x1="5.5" y1="2.5" x2="-5.5" y2="2.5" width="0.127" layer="21"/>
-<wire x1="-5.5" y1="1.5" x2="5.5" y2="1.5" width="0.127" layer="21"/>
+<wire x1="-5.5" y1="1.8302" x2="5.5" y2="1.8302" width="0.127" layer="21"/>
 <text x="-6" y="3.5" size="0.8128" layer="25">&gt;NAME</text>
 <text x="-6" y="-4" size="0.8128" layer="27">&gt;VALUE</text>
 <wire x1="-6" y1="3" x2="-6" y2="-3" width="0.127" layer="21"/>
