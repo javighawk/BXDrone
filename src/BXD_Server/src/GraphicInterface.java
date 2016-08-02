@@ -151,6 +151,7 @@ public class GraphicInterface extends JFrame{
         			public void run(){
         				btnConnect.setEnabled(false);
         				boxCOMPort.setEnabled(false);
+        				boxControllerCOMPort.setEnabled(false);
         				MainAction.connect();
         			}
         		};
